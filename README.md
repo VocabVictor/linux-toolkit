@@ -1,195 +1,227 @@
 # Linux Toolkit 🛠️
 
-个人 Linux 实用脚本和配置集合，让日常运维和开发更高效。
+现代化的 Linux 实用脚本工具包，支持一键安装，无需克隆仓库！
+
+## ⚡ 一键安装（推荐）
+
+### 🌍 国际版 (GitHub 直连)
+```bash
+# Zsh 完整配置
+curl -fsSL https://raw.githubusercontent.com/yourusername/linux-toolkit/main/zsh-config/setup.sh | bash
+
+# Docker 清理
+curl -fsSL https://raw.githubusercontent.com/yourusername/linux-toolkit/main/docker/cleanup.sh | bash
+
+# 系统清理
+curl -fsSL https://raw.githubusercontent.com/yourusername/linux-toolkit/main/system/clean.sh | bash
+```
+
+### 🇨🇳 国内加速版 (推荐中国用户)
+```bash
+# Zsh 完整配置  
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/yourusername/linux-toolkit/main/zsh-config/setup.sh | bash
+
+# Docker 清理
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/yourusername/linux-toolkit/main/docker/cleanup.sh | bash
+
+# 系统清理
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/yourusername/linux-toolkit/main/system/clean.sh | bash
+```
 
 ## 📂 项目结构
 
 ```
 linux-toolkit/
+├── lib/               # 公共工具库
 ├── zsh-config/        # Zsh 终端配置和美化
-├── system/            # 系统管理脚本
-├── network/           # 网络工具和配置
-├── docker/            # Docker 相关脚本
-├── backup/            # 备份和恢复脚本
-├── monitoring/        # 系统监控脚本
-├── security/          # 安全相关工具
-└── development/       # 开发环境配置
+├── system/            # 系统管理脚本  
+├── network/           # 网络工具和测试
+├── docker/            # Docker 管理脚本
+├── backup/            # 数据备份脚本
+└── .github/           # CI/CD 配置
 ```
 
-## 🚀 快速开始
+## 🛠️ 本地使用
 
-### 克隆仓库
+### 安装工具包
 ```bash
 git clone https://github.com/yourusername/linux-toolkit.git
 cd linux-toolkit
+make install  # 安装到 ~/bin
 ```
 
-### 使用脚本
-每个目录都包含独立的脚本和文档，可以根据需要单独使用。
+### 运行测试
+```bash
+make test     # 语法检查
+make lint     # 代码质量检查
+```
+
+## ✨ 智能特性
+
+- 🌐 **智能 GitHub 代理** - 自动检测并使用 gh-proxy.com 加速访问
+- 🔧 **动态依赖下载** - 脚本自动下载所需的公共库
+- 🔄 **网络容错机制** - 代理失败自动切换直连
+- 📱 **双模式兼容** - 支持本地运行和远程一键执行
+- 🔒 **安全验证** - 下载脚本完整性检查
+- 💾 **配置备份** - 自动备份现有配置文件
 
 ## 📦 功能模块
 
-### 1. Zsh 配置 (zsh-config)
-强大的 Zsh 终端配置，包含 Oh-My-Zsh、Powerlevel10k 主题和各种插件。
+### 🎨 Zsh 终端美化
+**一键命令：** `curl -fsSL https://raw.githubusercontent.com/yourusername/linux-toolkit/main/zsh-config/setup.sh | bash`
 
+包含：
+- ✅ Oh My Zsh 框架
+- ✅ Powerlevel10k 主题  
+- ✅ zsh-autosuggestions 自动建议
+- ✅ zsh-syntax-highlighting 语法高亮
+- ✅ 优化的配置和别名
+
+### 🧹 系统清理优化
+**一键命令：** `curl -fsSL https://raw.githubusercontent.com/yourusername/linux-toolkit/main/system/clean.sh | bash`
+
+功能：
+- ✅ 包管理器缓存清理
+- ✅ 用户缓存清理
+- ✅ 安全的临时文件清理
+- ✅ 日志文件管理
+
+### 🐳 Docker 管理
+**一键命令：** `curl -fsSL https://raw.githubusercontent.com/yourusername/linux-toolkit/main/docker/cleanup.sh | bash`
+
+功能：
+- ✅ 停止的容器清理
+- ✅ 未使用的镜像清理
+- ✅ 孤立卷和网络清理
+- ✅ 构建缓存清理
+
+### 💾 数据备份
+本地使用：`./backup/home.sh`
+
+功能：
+- ✅ 主目录智能备份
+- ✅ 自动排除临时文件
+- ✅ 备份完整性验证  
+- ✅ 旧备份自动轮转
+
+### 🌐 网络工具
+本地使用：`./network/speed.sh`
+
+功能：
+- ✅ 网速测试
+- ✅ 自动安装测试工具
+- ✅ 版本固定安装
+
+## 🚀 高级使用
+
+### 环境变量控制
 ```bash
-cd zsh-config
-./setup_zsh_enhanced.sh
+# 禁用 GitHub 代理（直连）
+GITHUB_PROXY=false curl -fsSL <script_url> | bash
+
+# 静默模式（非交互）
+BATCH=true curl -fsSL <script_url> | bash
+
+# 组合使用
+GITHUB_PROXY=false BATCH=true curl -fsSL <script_url> | bash
 ```
 
-**特性：**
-- 🎨 美观的 Powerlevel10k 主题
-- 🚀 智能自动补全和语法高亮
-- 📦 丰富的插件生态
-- [详细文档](./zsh-config/README.md)
-
-### 2. 系统管理 (system)
-常用的系统管理和优化脚本。
-
-**包含脚本：**
-- `clean_system.sh` - 系统清理脚本
-- `update_system.sh` - 系统更新脚本
-- `system_info.sh` - 系统信息收集
-- `optimize_performance.sh` - 性能优化
-
-### 3. 网络工具 (network)
-网络配置和诊断工具。
-
-**包含脚本：**
-- `network_speed_test.sh` - 网速测试
-- `port_scanner.sh` - 端口扫描工具
-- `proxy_setup.sh` - 代理配置
-- `dns_tools.sh` - DNS 工具集
-
-### 4. Docker 工具 (docker)
-Docker 容器管理和优化脚本。
-
-**包含脚本：**
-- `docker_cleanup.sh` - 清理无用镜像和容器
-- `docker_stats.sh` - 容器资源监控
-- `docker_backup.sh` - 容器备份脚本
-- `compose_manager.sh` - Docker Compose 管理
-
-### 5. 备份工具 (backup)
-自动化备份和恢复脚本。
-
-**包含脚本：**
-- `backup_home.sh` - 家目录备份
-- `mysql_backup.sh` - MySQL 数据库备份
-- `incremental_backup.sh` - 增量备份
-- `restore_backup.sh` - 恢复工具
-
-### 6. 监控工具 (monitoring)
-系统监控和报警脚本。
-
-**包含脚本：**
-- `resource_monitor.sh` - 资源监控
-- `log_analyzer.sh` - 日志分析
-- `process_monitor.sh` - 进程监控
-- `disk_usage_alert.sh` - 磁盘使用告警
-
-### 7. 安全工具 (security)
-系统安全加固和检查脚本。
-
-**包含脚本：**
-- `security_audit.sh` - 安全审计
-- `firewall_setup.sh` - 防火墙配置
-- `ssh_hardening.sh` - SSH 安全加固
-- `password_generator.sh` - 密码生成器
-
-### 8. 开发环境 (development)
-开发环境配置和工具。
-
-**包含脚本：**
-- `dev_env_setup.sh` - 开发环境一键配置
-- `git_config.sh` - Git 配置脚本
-- `nodejs_setup.sh` - Node.js 环境配置
-- `python_env.sh` - Python 虚拟环境管理
-
-## 🔧 通用功能
-
-### 环境检测
-所有脚本都包含：
-- 🔍 系统兼容性检查
-- 📋 依赖验证
-- 💾 自动备份
-- 🔄 错误恢复
-
-### 支持系统
-- Ubuntu/Debian
-- CentOS/RHEL
-- Arch Linux
-- macOS (部分支持)
-
-## 📝 使用示例
-
-### 系统初始化
+### 预览脚本内容
 ```bash
-# 1. 配置 Zsh 终端
-cd zsh-config && ./setup_zsh_enhanced.sh
-
-# 2. 系统优化
-cd ../system && ./optimize_performance.sh
-
-# 3. 配置开发环境
-cd ../development && ./dev_env_setup.sh
+curl -s https://raw.githubusercontent.com/yourusername/linux-toolkit/main/zsh-config/setup.sh | less
 ```
 
-### 日常维护
+### 克隆仓库
 ```bash
-# 系统清理
-./system/clean_system.sh
+# 国际版
+git clone https://github.com/yourusername/linux-toolkit.git
 
-# Docker 清理
-./docker/docker_cleanup.sh
-
-# 备份重要数据
-./backup/backup_home.sh
+# 国内加速版
+git clone https://gh-proxy.com/https://github.com/yourusername/linux-toolkit.git
 ```
 
-## 🤝 贡献指南
+### 本地开发
+```bash
+# 安装依赖
+make deps
 
-欢迎贡献新的脚本或改进现有脚本！
+# 运行测试
+make test
 
-### 贡献步骤
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/YourScript`)
-3. 提交更改 (`git commit -m 'Add YourScript'`)
-4. 推送到分支 (`git push origin feature/YourScript`)
-5. 创建 Pull Request
+# 代码检查  
+make lint
 
-### 脚本规范
-- 使用 Bash 4.0+ 特性
-- 包含错误处理
-- 添加详细注释
-- 提供使用文档
-- 遵循 ShellCheck 规范
+# 安装到系统
+make install
+```
+
+## 🔧 核心特性
+
+### 智能网络优化
+- 🌍 **中国大陆优化**：自动使用 gh-proxy.com 加速 GitHub 访问
+- ⚡ **快速切换**：10秒超时后自动降级直连
+- 🔄 **Git 代理**：自动配置 git clone 代理加速
+
+### 安全可靠
+- ✅ **脚本验证**：下载脚本完整性检查
+- 💾 **配置备份**：自动备份现有配置  
+- 🔒 **错误处理**：完整的异常处理机制
+- 🧹 **自动清理**：临时文件自动删除
+
+### 跨平台支持
+- 🐧 Ubuntu/Debian
+- 🎩 CentOS/RHEL  
+- 🏗️ Arch Linux
+- 🍎 macOS (部分功能)
+
+## 📝 快速示例
+
+### 🎨 完整 Zsh 美化（最受欢迎）
+```bash
+# 国际版
+curl -fsSL https://raw.githubusercontent.com/yourusername/linux-toolkit/main/zsh-config/setup.sh | bash
+
+# 国内加速版
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/yourusername/linux-toolkit/main/zsh-config/setup.sh | bash
+
+# 设置默认 shell
+chsh -s $(which zsh)
+
+# 重启终端即可使用
+```
+
+## ❓ 常见问题
+
+### Q: 脚本安全吗？
+A: 所有脚本都包含完整性检查，会自动备份现有配置，并有详细的错误处理机制。
+
+### Q: 中国大陆网络慢怎么办？
+A: 脚本自动使用 gh-proxy.com 代理加速，无需手动配置。
+
+### Q: 可以禁用代理吗？
+A: 使用 `GITHUB_PROXY=false` 环境变量即可禁用代理。
+
+### Q: 如何卸载 Zsh 配置？
+A: 运行 `./zsh-config/uninstall.sh` 或直接恢复备份的配置文件。
 
 ## 📄 许可证
 
 MIT License - 查看 [LICENSE](LICENSE) 文件了解详情
 
-## 🙏 致谢
+## 🌟 项目亮点
 
-感谢所有开源项目和社区贡献者！
-
-## 📮 联系方式
-
-- Issues: [GitHub Issues](https://github.com/yourusername/linux-toolkit/issues)
-- Email: your-email@example.com
+- 🚀 **真正一键安装** - 无需克隆仓库，直接 curl 执行
+- 🌍 **中国用户友好** - 自动代理加速，解决网络问题  
+- 🔧 **工程化标准** - 完整的 CI/CD、代码检查、错误处理
+- 📦 **模块化设计** - 每个脚本独立运行，按需使用
+- 🔒 **安全第一** - 配置备份、脚本验证、异常恢复
 
 ---
 
-⭐ 如果这个项目对你有帮助，请给个 Star 支持一下！
+⭐ **如果这个项目对你有帮助，请给个 Star 支持一下！**
 
-## 🔄 更新日志
+## 📮 问题反馈
 
-### v2.0.0 (2024-01)
-- 重构项目结构
-- 添加多个功能模块
-- 改进 Zsh 配置脚本
-- 添加卸载功能
-
-### v1.0.0 (2023-12)
-- 初始版本
-- 基础 Zsh 配置
+- 🐛 Bug 报告：[GitHub Issues](https://github.com/yourusername/linux-toolkit/issues)
+- 💡 功能建议：欢迎提交 Pull Request
+- 📧 联系作者：your-email@example.com
