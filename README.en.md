@@ -1,195 +1,158 @@
-# Linux Toolkit 🛠️
+# Linux Toolkit
 
-A collection of personal Linux utility scripts and configurations for efficient daily operations and development.
+A collection of Linux utility scripts for system management and development environment configuration. All scripts are designed to work without root privileges, using intelligent dependency handling and user-space installations.
 
-## 📂 Project Structure
+## Architecture Design
+
+### Project Structure
 
 ```
 linux-toolkit/
-├── zsh-config/        # Zsh terminal configuration and beautification
-├── system/            # System management scripts
-├── network/           # Network tools and configurations
-├── docker/            # Docker related scripts
-├── backup/            # Backup and recovery scripts
-├── monitoring/        # System monitoring scripts
-├── security/          # Security related tools
-└── development/       # Development environment setup
+├── lib/
+│   └── common.sh       # Unified function library (no code duplication)
+├── zshconfig/          # Zsh configuration module
+│   ├── setup.sh        # Automated installation and configuration
+│   └── uninstall.sh    # Clean uninstall
+├── system/             # System management module
+│   ├── clean.sh        # Intelligent system cleanup
+│   └── info.sh         # System information viewer
+├── network/            # Network tools module
+│   └── speed.sh        # Network performance testing
+├── docker/             # Docker management module
+│   └── cleanup.sh      # Container and image cleanup
+└── backup/             # Data backup module
+    └── home.sh         # Personal file backup
 ```
 
-## 🚀 Quick Start
+### Dual-Mode Execution Architecture
 
-### Clone Repository
+Each script supports two execution modes:
+
+1. **Local execution**: Uses local `lib/common.sh`
+2. **Remote execution**: Automatically downloads `common.sh` to temporary file
+
+This design eliminates code duplication and unifies logging output, error handling, and common utility functions.
+
+## Quick Start
+
+### Installation Method Description
+
+All scripts are designed to **run without root privileges**:
+
+- **Automatic dependency handling**: Scripts detect required tools and provide clear installation guidance
+- **User-space installation**: Tools install to `~/.local/bin` (like zsh, speedtest-cli)
+- **Graceful degradation**: Automatically switches to user-executable operations when missing system privileges
+- **Clear prompts**: Explicitly indicates which operations require manual system package installation
+
+### One-Click Execution Scripts (Recommended)
+
+Scripts support standalone execution with automatic dependency download:
+
 ```bash
-git clone https://github.com/yourusername/linux-toolkit.git
+# Zsh configuration (auto-downloads common.sh)
+curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zshconfig/setup.sh | bash
+
+# System cleanup (auto-downloads common.sh)
+curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/system/clean.sh | bash
+
+# Docker cleanup (auto-downloads common.sh)
+curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/docker/cleanup.sh | bash
+
+# Network speed test (auto-downloads common.sh)
+curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/network/speed.sh | bash
+```
+
+### Local Installation
+
+```bash
+git clone https://github.com/VocabVictor/linux-toolkit.git
 cd linux-toolkit
+make install  # Install to ~/bin
+make test     # Run tests
 ```
 
-### Using Scripts
-Each directory contains independent scripts and documentation that can be used separately as needed.
+## Feature Modules
 
-## 📦 Feature Modules
+### Zsh Environment Configuration (zshconfig)
 
-### 1. Zsh Configuration (zsh-config)
-Powerful Zsh terminal configuration with Oh-My-Zsh, Powerlevel10k theme and various plugins.
+Automatically installs Oh My Zsh + Powerlevel10k, completely without root privileges. Automatically handles dependencies, provides clear manual installation guidance.
+
+**Features**: Framework installation, theme beautification, syntax highlighting, intelligent completion, configuration backup
 
 ```bash
-cd zsh-config
-./setup_zsh_enhanced.sh
+# Local execution
+./zshconfig/setup.sh
+./zshconfig/uninstall.sh
 ```
 
-**Features:**
-- 🎨 Beautiful Powerlevel10k theme
-- 🚀 Smart auto-completion and syntax highlighting
-- 📦 Rich plugin ecosystem
-- [Detailed Documentation](./zsh-config/README.en.md)
+### System Management (system)
 
-### 2. System Management (system)
-Common system management and optimization scripts.
+**Intelligent cleanup**: `clean.sh` - Safe cleanup without root privileges, handles user caches and temporary files, provides system-level cleanup command suggestions  
+**System information**: `info.sh` - Displays system configuration and resource usage
 
-**Included Scripts:**
-- `clean_system.sh` - System cleanup script
-- `update_system.sh` - System update script
-- `system_info.sh` - System information collector
-- `optimize_performance.sh` - Performance optimization
+### Docker Management (docker)
 
-### 3. Network Tools (network)
-Network configuration and diagnostic tools.
+**Comprehensive cleanup**: `cleanup.sh` - One-click cleanup of stopped containers, unused images, volumes, networks, and build cache
 
-**Included Scripts:**
-- `network_speed_test.sh` - Network speed test
-- `port_scanner.sh` - Port scanning tool
-- `proxy_setup.sh` - Proxy configuration
-- `dns_tools.sh` - DNS toolkit
+### Network Tools (network)
 
-### 4. Docker Tools (docker)
-Docker container management and optimization scripts.
+**Speed testing**: `speed.sh` - Automatically installs speedtest-cli to user directory when unavailable, tests upload/download bandwidth and latency
 
-**Included Scripts:**
-- `docker_cleanup.sh` - Clean unused images and containers
-- `docker_stats.sh` - Container resource monitoring
-- `docker_backup.sh` - Container backup script
-- `compose_manager.sh` - Docker Compose management
+### Data Backup (backup)
 
-### 5. Backup Tools (backup)
-Automated backup and recovery scripts.
+**Personal backup**: `home.sh` - Intelligent backup of configuration files, SSH keys, and important data
 
-**Included Scripts:**
-- `backup_home.sh` - Home directory backup
-- `mysql_backup.sh` - MySQL database backup
-- `incremental_backup.sh` - Incremental backup
-- `restore_backup.sh` - Restore tool
+## Configuration Options
 
-### 6. Monitoring Tools (monitoring)
-System monitoring and alerting scripts.
+Supports environment variables to control script behavior:
 
-**Included Scripts:**
-- `resource_monitor.sh` - Resource monitoring
-- `log_analyzer.sh` - Log analysis
-- `process_monitor.sh` - Process monitoring
-- `disk_usage_alert.sh` - Disk usage alerts
-
-### 7. Security Tools (security)
-System security hardening and audit scripts.
-
-**Included Scripts:**
-- `security_audit.sh` - Security audit
-- `firewall_setup.sh` - Firewall configuration
-- `ssh_hardening.sh` - SSH security hardening
-- `password_generator.sh` - Password generator
-
-### 8. Development Environment (development)
-Development environment setup and tools.
-
-**Included Scripts:**
-- `dev_env_setup.sh` - One-click dev environment setup
-- `git_config.sh` - Git configuration script
-- `nodejs_setup.sh` - Node.js environment setup
-- `python_env.sh` - Python virtual environment management
-
-## 🔧 Common Features
-
-### Environment Detection
-All scripts include:
-- 🔍 System compatibility check
-- 📋 Dependency verification
-- 💾 Automatic backup
-- 🔄 Error recovery
-
-### Supported Systems
-- Ubuntu/Debian
-- CentOS/RHEL
-- Arch Linux
-- macOS (partial support)
-
-## 📝 Usage Examples
-
-### System Initialization
 ```bash
-# 1. Configure Zsh terminal
-cd zsh-config && ./setup_zsh_enhanced.sh
+# Silent mode (non-interactive execution)
+BATCH=true curl -fsSL <script_url> | bash
 
-# 2. System optimization
-cd ../system && ./optimize_performance.sh
+# CI environment mode
+CI=true curl -fsSL <script_url> | bash
 
-# 3. Setup development environment
-cd ../development && ./dev_env_setup.sh
+# Custom download timeout (seconds)
+DOWNLOAD_TIMEOUT=60 curl -fsSL <script_url> | bash
 ```
 
-### Daily Maintenance
+## System Support
+
+| System | Status | Description |
+|--------|--------|-------------|
+| Ubuntu/Debian | ✅ Full support | No root privileges required, graceful degradation |
+| CentOS/RHEL | ✅ Full support | No root privileges required, graceful degradation |
+| Arch Linux | ✅ Full support | No root privileges required, graceful degradation |
+| macOS | ⚠️ Partial support | System cleanup functionality not supported |
+
+## Development Guide
+
 ```bash
-# System cleanup
-./system/clean_system.sh
-
-# Docker cleanup
-./docker/docker_cleanup.sh
-
-# Backup important data
-./backup/backup_home.sh
+make deps     # Install development dependencies (shellcheck)
+make test     # Syntax validation for all scripts
+make lint     # shellcheck code quality check
+make install  # Install to ~/bin directory
 ```
 
-## 🤝 Contributing
+### Technical Features
 
-Contributions of new scripts or improvements to existing ones are welcome!
+- **No root privileges required**: All scripts run under normal user permissions
+- **Intelligent dependency handling**: Automatically detects dependencies and provides clear manual installation guidance
+- **Graceful degradation**: Automatically switches to user-space operations when missing system permissions
+- **Zero dependencies**: Remote execution requires no installation, automatically downloads dependencies
+- **Dual-mode**: Local development + remote one-click deployment
+- **Error handling**: Unified exception handling and logging output
+- **Security**: Automatic temporary file cleanup, `set -euo pipefail`
+- **Compatibility**: Supports curl/wget, multi-distribution compatibility
 
-### Contribution Steps
-1. Fork this repository
-2. Create feature branch (`git checkout -b feature/YourScript`)
-3. Commit changes (`git commit -m 'Add YourScript'`)
-4. Push to branch (`git push origin feature/YourScript`)
-5. Create Pull Request
-
-### Script Standards
-- Use Bash 4.0+ features
-- Include error handling
-- Add detailed comments
-- Provide usage documentation
-- Follow ShellCheck standards
-
-## 📄 License
+## License
 
 MIT License - See [LICENSE](LICENSE) file for details
 
-## 🙏 Acknowledgments
+## Contributing
 
-Thanks to all open source projects and community contributors!
+Welcome to submit Issues and Pull Requests.
 
-## 📮 Contact
-
-- Issues: [GitHub Issues](https://github.com/yourusername/linux-toolkit/issues)
-- Email: your-email@example.com
-
----
-
-⭐ If this project helps you, please give it a Star!
-
-## 🔄 Changelog
-
-### v2.0.0 (2024-01)
-- Restructured project architecture
-- Added multiple feature modules
-- Improved Zsh configuration script
-- Added uninstall functionality
-
-### v1.0.0 (2023-12)
-- Initial version
-- Basic Zsh configuration
+- Bug reports: [GitHub Issues](https://github.com/VocabVictor/linux-toolkit/issues)
+- Feature suggestions: Submit through Pull Request

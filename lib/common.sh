@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # Set toolkit base directory
-TOOLKIT_BASE_URL="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+TOOLKIT_BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Color support detection
 if [ -t 1 ] && [ "${TERM:-}" != "dumb" ]; then
@@ -90,5 +90,5 @@ smart_download() {
 # Import local script
 import_script() {
     local script_path="$1"
-    source "$TOOLKIT_BASE_URL/$script_path"
+    source "$TOOLKIT_BASE_DIR/$script_path"
 }

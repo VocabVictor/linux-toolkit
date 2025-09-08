@@ -50,9 +50,10 @@ When scripts are executed via `curl | bash`, the `BASH_SOURCE` variable is not a
 When implementing new scripts:
 - Use `command -v tool` to detect dependencies
 - Provide specific installation commands for each distribution
-- Implement user-space alternatives (e.g., `pip3 install --user`)
+- Implement user-space alternatives (e.g., compile from source to ~/.local)
 - Use warning messages instead of hard failures for missing system packages
 - Gracefully handle permission-related failures
+- For critical tools like zsh, implement local compilation with ncurses dependency handling
 
 #### Testing Commands
 Before committing, always run:
@@ -102,12 +103,14 @@ fi
 - **No-sudo architecture**: All scripts now work without root privileges
 - **Graceful dependency handling**: Scripts provide clear manual installation guidance
 - **User-space installations**: Tools install to `~/.local/bin` when possible
+- **Advanced compilation support**: Added ncurses and zsh compilation from source for environments without system packages
 - Renamed `zsh-config/` to `zshconfig/` for consistency
 - Fixed sourcing patterns to use `BASH_SOURCE` consistently
 - Eliminated ALL code duplication - scripts now download common.sh when needed
 - Added `set -euo pipefail` to all executable scripts
 - Removed documentation files from functional directories
 - Implemented proper standalone mode without inline function duplication
+- Enhanced build tool detection and dependency compilation
 
 ## GitHub Repository
 - Repository: VocabVictor/linux-toolkit

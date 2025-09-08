@@ -1,6 +1,6 @@
 # Linux Toolkit
 
-Linux 实用工具脚本集合，提供系统管理和开发环境配置的自动化解决方案。
+Linux 实用工具脚本集合，提供系统管理和开发环境配置的自动化解决方案。所有脚本均采用无需 root 权限设计，支持智能依赖处理和用户空间安装。
 
 ## 架构设计
 
@@ -60,6 +60,9 @@ curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/do
 
 # 网络测速 (自动下载 common.sh)
 curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/network/speed.sh | bash
+
+# 个人数据备份 (自动下载 common.sh)
+curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/backup/home.sh | bash
 ```
 
 ### 本地安装
@@ -75,7 +78,7 @@ make test     # 运行测试
 
 ### Zsh 环境配置 (zshconfig)
 
-自动安装 Oh My Zsh + Powerlevel10k，完全无需 root 权限。自动处理依赖关系，提供清晰的手动安装指引。
+自动安装 Oh My Zsh + Powerlevel10k，完全无需 root 权限。自动检测缺少的依赖（gcc、make、ncurses-dev），如需要会自动编译 ncurses 和 zsh 到用户目录。提供清晰的手动安装指引。
 
 **特性**: 框架安装、主题美化、语法高亮、智能补全、配置备份
 
@@ -96,7 +99,7 @@ make test     # 运行测试
 
 ### 网络工具 (network)
 
-**速度测试**: `speed.sh` - 自动安装 speedtest-cli 到用户目录，检测上下行带宽和延迟
+**速度测试**: `speed.sh` - 智能检测网络工具，优先使用系统 speedtest-cli，不存在时自动安装到 ~/.local/bin，检测上下行带宽和延迟
 
 ### 数据备份 (backup)
 
