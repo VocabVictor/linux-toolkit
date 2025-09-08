@@ -1,6 +1,6 @@
 #!/bin/bash
 # Linux Toolkit - System cleanup (standalone capable)
-# Usage: curl -fsSL https://raw.githubusercontent.com/user/linux-toolkit/main/system/clean.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/system/clean.sh | bash
 # Copyright (c) 2025 Linux Toolkit. MIT License.
 
 set -euo pipefail
@@ -24,11 +24,12 @@ smart_download() {
 }
 
 # Auto-detect if running standalone or locally
-if [[ "${BASH_SOURCE[0]}" == *"http"* ]] || [[ ! -f "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh" ]]; then
+SCRIPT_SOURCE="${BASH_SOURCE[0]:-}"
+if [ -z "$SCRIPT_SOURCE" ] || [[ "$SCRIPT_SOURCE" == *"http"* ]] || [[ ! -f "$(dirname "$SCRIPT_SOURCE")/../lib/common.sh" 2>/dev/null ]]; then
     # Standalone mode - download common.sh
     echo "INFO: Running in standalone mode, downloading dependencies..."
     TEMP_COMMON="/tmp/toolkit_common_$(date +%s).sh"
-    smart_download "https://raw.githubusercontent.com/user/linux-toolkit/main/lib/common.sh" "$TEMP_COMMON" || {
+    smart_download "https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/lib/common.sh" "$TEMP_COMMON" || {
         echo "ERROR: Failed to download common utilities" >&2
         exit 1
     }

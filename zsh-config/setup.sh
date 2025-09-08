@@ -1,6 +1,6 @@
 #!/bin/bash
 # Linux Toolkit - Zsh setup (standalone capable)
-# Usage: curl -fsSL https://raw.githubusercontent.com/user/linux-toolkit/main/zsh-config/setup.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zsh-config/setup.sh | bash
 # Copyright (c) 2025 Linux Toolkit. MIT License.
 
 set -euo pipefail
@@ -27,11 +27,13 @@ smart_download() {
 }
 
 # Auto-detect if running standalone (via curl) or locally
-if [[ "${BASH_SOURCE[0]}" == *"http"* ]] || [[ ! -f "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh" ]]; then
+# When piped from curl, BASH_SOURCE might not be available
+SCRIPT_SOURCE="${BASH_SOURCE[0]:-}"
+if [ -z "$SCRIPT_SOURCE" ] || [[ "$SCRIPT_SOURCE" == *"http"* ]] || [[ ! -f "$(dirname "$SCRIPT_SOURCE")/../lib/common.sh" 2>/dev/null ]]; then
     # Standalone mode - download common.sh
     echo "INFO: Running in standalone mode, downloading dependencies..."
     TEMP_COMMON="/tmp/toolkit_common_$(date +%s).sh"
-    smart_download "https://raw.githubusercontent.com/user/linux-toolkit/main/lib/common.sh" "$TEMP_COMMON" || {
+    smart_download "https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/lib/common.sh" "$TEMP_COMMON" || {
         echo "ERROR: Failed to download common utilities" >&2
         exit 1
     }
@@ -39,7 +41,7 @@ if [[ "${BASH_SOURCE[0]}" == *"http"* ]] || [[ ! -f "$(dirname "${BASH_SOURCE[0]
     rm -f "$TEMP_COMMON"
 else
     # Local mode - use relative path
-    source "$(dirname "$0")/../lib/common.sh"
+    source "$(dirname "$SCRIPT_SOURCE")/../lib/common.sh"
 fi
 
 info "Installing Zsh + Oh My Zsh setup"

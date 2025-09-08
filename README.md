@@ -1,51 +1,58 @@
 # Linux Toolkit 🛠️
 
-现代化的 Linux 实用脚本工具包，支持一键安装，无需克隆仓库！
+现代化的 Linux 实用脚本工具包，提供终端美化、系统管理和开发环境配置的一键式解决方案。
 
 ## ⚡ 一键安装（推荐）
 
 ### 🌍 国际版 (GitHub 直连)
 ```bash
-# Zsh 完整配置
-curl -fsSL https://raw.githubusercontent.com/yourusername/linux-toolkit/main/zsh-config/setup.sh | bash
+# Zsh 终端配置 - 安装 Oh My Zsh + Powerlevel10k
+curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zsh-config/setup.sh | bash
 
-# Docker 清理
-curl -fsSL https://raw.githubusercontent.com/yourusername/linux-toolkit/main/docker/cleanup.sh | bash
+# Docker 系统清理 - 清理未使用的容器和镜像
+curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/docker/cleanup.sh | bash
 
-# 系统清理
-curl -fsSL https://raw.githubusercontent.com/yourusername/linux-toolkit/main/system/clean.sh | bash
+# 系统垃圾清理 - 清理包缓存和临时文件
+curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/system/clean.sh | bash
 ```
 
 ### 🇨🇳 国内加速版 (推荐中国用户)
 ```bash
-# Zsh 完整配置  
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/yourusername/linux-toolkit/main/zsh-config/setup.sh | bash
+# Zsh 终端配置 - 安装 Oh My Zsh + Powerlevel10k
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zsh-config/setup.sh | bash
 
-# Docker 清理
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/yourusername/linux-toolkit/main/docker/cleanup.sh | bash
+# Docker 系统清理 - 清理未使用的容器和镜像
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/docker/cleanup.sh | bash
 
-# 系统清理
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/yourusername/linux-toolkit/main/system/clean.sh | bash
+# 系统垃圾清理 - 清理包缓存和临时文件
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/system/clean.sh | bash
 ```
 
 ## 📂 项目结构
 
 ```
 linux-toolkit/
-├── lib/               # 公共工具库
-├── zsh-config/        # Zsh 终端配置和美化
-├── system/            # 系统管理脚本  
-├── network/           # 网络工具和测试
-├── docker/            # Docker 管理脚本
-├── backup/            # 数据备份脚本
-└── .github/           # CI/CD 配置
+├── lib/               # 公共工具库和函数
+├── zsh-config/        # Zsh 终端配置与美化
+│   ├── setup.sh       # 一键安装脚本
+│   └── uninstall.sh   # 卸载脚本
+├── system/            # 系统管理与优化
+│   ├── clean.sh       # 系统清理脚本
+│   └── info.sh        # 系统信息查看
+├── network/           # 网络工具与测试
+│   └── speed.sh       # 网络速度测试
+├── docker/            # Docker 管理工具
+│   └── cleanup.sh     # Docker 清理脚本
+├── backup/            # 数据备份工具
+│   └── home.sh        # 家目录备份
+└── .github/           # GitHub CI/CD 配置
 ```
 
 ## 🛠️ 本地使用
 
 ### 安装工具包
 ```bash
-git clone https://github.com/yourusername/linux-toolkit.git
+git clone https://github.com/VocabVictor/linux-toolkit.git
 cd linux-toolkit
 make install  # 安装到 ~/bin
 ```
@@ -68,76 +75,87 @@ make lint     # 代码质量检查
 ## 📦 功能模块
 
 ### 🎨 Zsh 终端美化
-**一键命令：** `curl -fsSL https://raw.githubusercontent.com/yourusername/linux-toolkit/main/zsh-config/setup.sh | bash`
+**一键安装：** `curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zsh-config/setup.sh | bash`
 
-包含：
-- ✅ Oh My Zsh 框架
-- ✅ Powerlevel10k 主题  
-- ✅ zsh-autosuggestions 自动建议
-- ✅ zsh-syntax-highlighting 语法高亮
-- ✅ 优化的配置和别名
+**功能特性：**
+- ✅ Oh My Zsh 框架自动安装
+- ✅ Powerlevel10k 美观主题配置
+- ✅ 智能命令补全与语法高亮
+- ✅ Git 状态显示与快捷别名
+- ✅ 支持中国大陆网络环境优化
+- ✅ 自动备份现有配置文件
 
 ### 🧹 系统清理优化
-**一键命令：** `curl -fsSL https://raw.githubusercontent.com/yourusername/linux-toolkit/main/system/clean.sh | bash`
+**一键清理：** `curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/system/clean.sh | bash`
 
-功能：
-- ✅ 包管理器缓存清理
-- ✅ 用户缓存清理
-- ✅ 安全的临时文件清理
-- ✅ 日志文件管理
+**清理内容：**
+- ✅ APT/YUM/Pacman 包管理器缓存
+- ✅ 用户临时文件和缓存目录
+- ✅ 系统日志文件（保留最近7天）
+- ✅ 浏览器缓存和下载文件
+- ✅ 回收站和废纸篓清空
 
-### 🐳 Docker 管理
-**一键命令：** `curl -fsSL https://raw.githubusercontent.com/yourusername/linux-toolkit/main/docker/cleanup.sh | bash`
+### 🐳 Docker 系统管理
+**一键清理：** `curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/docker/cleanup.sh | bash`
 
-功能：
-- ✅ 停止的容器清理
-- ✅ 未使用的镜像清理
-- ✅ 孤立卷和网络清理
-- ✅ 构建缓存清理
+**清理范围：**
+- ✅ 已停止的容器和孤立进程
+- ✅ 未被使用的镜像和标签
+- ✅ 悬空卷（dangling volumes）
+- ✅ 未使用的网络和构建缓存
+- ✅ 显示清理前后的空间对比
 
-### 💾 数据备份
-本地使用：`./backup/home.sh`
+### 💾 数据备份工具
+**本地执行：** `./backup/home.sh` 或克隆后使用
 
-功能：
-- ✅ 主目录智能备份
-- ✅ 自动排除临时文件
-- ✅ 备份完整性验证  
-- ✅ 旧备份自动轮转
+**备份功能：**
+- ✅ 家目录重要文件智能备份
+- ✅ 自动排除缓存和临时文件
+- ✅ 支持增量备份和压缩存储
+- ✅ 备份完整性校验机制
+- ✅ 定期清理过期备份文件
 
-### 🌐 网络工具
-本地使用：`./network/speed.sh`
+### 🌐 网络诊断工具
+**本地执行：** `./network/speed.sh` 或克隆后使用
 
-功能：
-- ✅ 网速测试
-- ✅ 自动安装测试工具
-- ✅ 版本固定安装
+**测试功能：**
+- ✅ 多服务器节点网速测试
+- ✅ 自动安装 speedtest-cli 工具
+- ✅ 延迟、下载和上传速度检测
+- ✅ 结果格式化输出和历史记录
 
 ## 🚀 高级使用
 
 ### 环境变量控制
 ```bash
-# 禁用 GitHub 代理（直连）
+# 禁用 GitHub 代理（直连模式）
 GITHUB_PROXY=false curl -fsSL <script_url> | bash
 
-# 静默模式（非交互）
+# 静默模式（跳过交互确认）
 BATCH=true curl -fsSL <script_url> | bash
 
-# 组合使用
+# 组合模式（直连 + 静默）
 GITHUB_PROXY=false BATCH=true curl -fsSL <script_url> | bash
 ```
 
-### 预览脚本内容
+### 预览脚本内容（建议执行前查看）
 ```bash
-curl -s https://raw.githubusercontent.com/yourusername/linux-toolkit/main/zsh-config/setup.sh | less
+# 查看 Zsh 配置脚本内容
+curl -s https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zsh-config/setup.sh | less
+
+# 查看系统清理脚本内容
+curl -s https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/system/clean.sh | less
 ```
 
-### 克隆仓库
+### 完整克隆仓库
 ```bash
-# 国际版
-git clone https://github.com/yourusername/linux-toolkit.git
+# 国际版（直连 GitHub）
+git clone https://github.com/VocabVictor/linux-toolkit.git
+cd linux-toolkit
 
-# 国内加速版
-git clone https://gh-proxy.com/https://github.com/yourusername/linux-toolkit.git
+# 国内加速版（推荐中国用户）
+git clone https://gh-proxy.com/https://github.com/VocabVictor/linux-toolkit.git
+cd linux-toolkit
 ```
 
 ### 本地开发
@@ -176,33 +194,34 @@ make install
 
 ## 📝 快速示例
 
-### 🎨 完整 Zsh 美化（最受欢迎）
+### 🎨 完整 Zsh 美化配置（推荐新手）
 ```bash
-# 国际版
-curl -fsSL https://raw.githubusercontent.com/yourusername/linux-toolkit/main/zsh-config/setup.sh | bash
+# 国际版（GitHub 直连）
+curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zsh-config/setup.sh | bash
 
-# 国内加速版
-curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/yourusername/linux-toolkit/main/zsh-config/setup.sh | bash
+# 国内加速版（推荐中国用户）
+curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zsh-config/setup.sh | bash
 
-# 设置默认 shell
+# 安装完成后设置为默认 Shell
 chsh -s $(which zsh)
 
-# 重启终端即可使用
+# 重新登录或执行以下命令立即生效
+exec zsh
 ```
 
 ## ❓ 常见问题
 
-### Q: 脚本安全吗？
-A: 所有脚本都包含完整性检查，会自动备份现有配置，并有详细的错误处理机制。
+### Q: 脚本执行安全吗？
+A: 是的。所有脚本都包含完整性验证，执行前自动备份现有配置，具备完善的错误处理和回滚机制。建议执行前先预览脚本内容。
 
-### Q: 中国大陆网络慢怎么办？
-A: 脚本自动使用 gh-proxy.com 代理加速，无需手动配置。
+### Q: 中国大陆访问 GitHub 速度慢怎么办？
+A: 脚本内置智能代理检测，自动使用 gh-proxy.com 镜像加速下载，超时后自动切换直连，无需手动干预。
 
-### Q: 可以禁用代理吗？
-A: 使用 `GITHUB_PROXY=false` 环境变量即可禁用代理。
+### Q: 如何强制使用直连模式？
+A: 在命令前添加 `GITHUB_PROXY=false` 环境变量即可跳过代理，直接连接 GitHub。
 
 ### Q: 如何卸载 Zsh 配置？
-A: 运行 `./zsh-config/uninstall.sh` 或直接恢复备份的配置文件。
+A: 执行 `./zsh-config/uninstall.sh` 卸载脚本，或手动恢复 `~/.zshrc.backup` 等备份文件。
 
 ## 📄 许可证
 
@@ -222,6 +241,5 @@ MIT License - 查看 [LICENSE](LICENSE) 文件了解详情
 
 ## 📮 问题反馈
 
-- 🐛 Bug 报告：[GitHub Issues](https://github.com/yourusername/linux-toolkit/issues)
+- 🐛 Bug 报告：[GitHub Issues](https://github.com/VocabVictor/linux-toolkit/issues)
 - 💡 功能建议：欢迎提交 Pull Request
-- 📧 联系作者：your-email@example.com
