@@ -5,30 +5,28 @@
 
 set -euo pipefail
 
-# Detect if running via curl pipe or locally
-if [ -z "${BASH_SOURCE[0]:-}" ] || [ "${BASH_SOURCE[0]}" = "" ]; then
-    # Running via curl pipe - define functions inline
+# Source functions - local or standalone mode
+if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+    # Local execution - use common.sh
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    source "$SCRIPT_DIR/../lib/common.sh"
+else
+    # Standalone execution - minimal inline functions
     err() { echo -e "\033[0;31mERROR:\033[0m $*" >&2; exit 1; }
     warn() { echo -e "\033[0;33mWARN:\033[0m $*" >&2; }
     info() { echo -e "\033[0;34mINFO:\033[0m $*"; }
     ok() { echo -e "\033[0;32mOK:\033[0m $*"; }
     check_cmd() { command -v "$1" >/dev/null 2>&1 || err "$1 not found. Install it first."; }
     smart_download() {
-        local url="$1"
-        local output_file="$2"
-        local timeout="${3:-30}"
+        local url="$1" output_file="$2"
         if command -v curl >/dev/null 2>&1; then
-            curl -fsSL --connect-timeout "$timeout" --max-time $((timeout * 2)) "$url" > "$output_file" || return 1
+            curl -fsSL "$url" > "$output_file" || return 1
         elif command -v wget >/dev/null 2>&1; then
-            wget -q -O "$output_file" --timeout="$timeout" "$url" || return 1
+            wget -q -O "$output_file" "$url" || return 1
         else
-            err "Neither curl nor wget available for download"
+            err "Neither curl nor wget available"
         fi
     }
-else
-    # Running locally - source common utilities
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    source "$SCRIPT_DIR/../lib/common.sh"
 fi
 
 info "Installing Zsh + Oh My Zsh setup"

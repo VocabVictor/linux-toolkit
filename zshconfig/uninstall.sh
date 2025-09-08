@@ -2,6 +2,8 @@
 # Linux Toolkit - Zsh uninstaller
 # Copyright (c) 2025 Linux Toolkit. MIT License.
 
+set -euo pipefail
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 

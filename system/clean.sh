@@ -5,18 +5,17 @@
 
 set -euo pipefail
 
-# Detect if running via curl pipe or locally
-if [ -z "${BASH_SOURCE[0]:-}" ] || [ "${BASH_SOURCE[0]}" = "" ]; then
-    # Running via curl pipe - define functions inline
+# Source functions - local or standalone mode
+if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+    # Local execution - use common.sh
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    source "$SCRIPT_DIR/../lib/common.sh"
+else
+    # Standalone execution - minimal inline functions
     err() { echo -e "\033[0;31mERROR:\033[0m $*" >&2; exit 1; }
     warn() { echo -e "\033[0;33mWARN:\033[0m $*" >&2; }
     info() { echo -e "\033[0;34mINFO:\033[0m $*"; }
     ok() { echo -e "\033[0;32mOK:\033[0m $*"; }
-    check_cmd() { command -v "$1" >/dev/null 2>&1 || err "$1 not found. Install it first."; }
-else
-    # Running locally - source common utilities
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    source "$SCRIPT_DIR/../lib/common.sh"
 fi
 
 info "Starting system cleanup"
