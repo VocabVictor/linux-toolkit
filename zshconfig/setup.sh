@@ -54,7 +54,19 @@ install_ncurses_local() {
     cd "$NCURSES_DIR"
     
     info "Configuring ncurses..."
-    ./configure --prefix="$INSTALL_DIR" --enable-shared --enable-widec --without-debug --without-ada --enable-overwrite >/dev/null 2>&1 || return 1
+    CFLAGS="-fPIC" CXXFLAGS="-fPIC" ./configure \
+        --prefix="$INSTALL_DIR" \
+        --enable-shared \
+        --enable-static \
+        --enable-widec \
+        --without-debug \
+        --without-ada \
+        --enable-overwrite \
+        --with-shared \
+        --with-cxx-shared \
+        --enable-pc-files \
+        --with-pkg-config-libdir="$INSTALL_DIR/lib/pkgconfig" \
+        >/dev/null 2>&1 || return 1
     
     info "Compiling ncurses (this may take a few minutes)..."
     make -j$(nproc 2>/dev/null || echo 1) >/dev/null 2>&1 || return 1
