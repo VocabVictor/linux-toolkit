@@ -215,6 +215,17 @@ install_zsh_local() {
     # Configure and compile (use local ncurses if available)
     info "Configuring zsh build..."
     
+    # CRITICAL: Remove any existing static libraries to prevent linking issues
+    # This handles cases where previous runs left static libraries
+    if [ -d "$INSTALL_DIR/lib" ]; then
+        info "Ensuring no static libraries interfere with compilation..."
+        rm -f "$INSTALL_DIR/lib"/*.a 2>/dev/null
+        # Also check for any ncurses static libraries specifically
+        rm -f "$INSTALL_DIR/lib"/libncurses*.a 2>/dev/null
+        rm -f "$INSTALL_DIR/lib"/libtinfo*.a 2>/dev/null
+        rm -f "$INSTALL_DIR/lib"/libtermcap*.a 2>/dev/null
+    fi
+    
     # Always set up environment variables for local installation paths
     export PKG_CONFIG_PATH="$INSTALL_DIR/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
     export LD_LIBRARY_PATH="$INSTALL_DIR/lib:${LD_LIBRARY_PATH:-}"
@@ -226,6 +237,11 @@ install_zsh_local() {
     # Check if we have locally compiled ncurses
     if [ -f "$INSTALL_DIR/lib/libncursesw.so" ] || [ -f "$INSTALL_DIR/lib/libtinfow.so" ]; then
         info "Using locally compiled ncurses (shared library)..."
+        # Verify we only have shared libraries, no static ones
+        if ls "$INSTALL_DIR/lib"/*.a >/dev/null 2>&1; then
+            warn "WARNING: Static libraries detected, removing them..."
+            rm -f "$INSTALL_DIR/lib"/*.a
+        fi
         # Explicitly tell configure where to find ncurses
         export LIBS="-lncursesw -ltinfow"
         # Some systems need explicit termcap library specification
