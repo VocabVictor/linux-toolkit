@@ -36,6 +36,45 @@ fi
 
 info "Installing Zsh + Oh My Zsh setup"
 
+# Function to compile ncurses locally
+install_ncurses_local() {
+    local INSTALL_DIR="$1"
+    local NCURSES_VERSION="6.4"
+    local NCURSES_DIR="$INSTALL_DIR/src/ncurses-$NCURSES_VERSION"
+    
+    info "Downloading ncurses $NCURSES_VERSION..."
+    cd "$INSTALL_DIR/src"
+    
+    if ! smart_download "https://invisible-mirror.net/archives/ncurses/ncurses-$NCURSES_VERSION.tar.gz" "ncurses-$NCURSES_VERSION.tar.gz"; then
+        warn "Failed to download ncurses"
+        return 1
+    fi
+    
+    tar -xf "ncurses-$NCURSES_VERSION.tar.gz" || return 1
+    cd "$NCURSES_DIR"
+    
+    info "Configuring ncurses..."
+    ./configure --prefix="$INSTALL_DIR" --enable-shared --enable-widec --without-debug --without-ada --enable-overwrite >/dev/null 2>&1 || return 1
+    
+    info "Compiling ncurses (this may take a few minutes)..."
+    make -j$(nproc 2>/dev/null || echo 1) >/dev/null 2>&1 || return 1
+    
+    info "Installing ncurses to $INSTALL_DIR..."
+    make install >/dev/null 2>&1 || return 1
+    
+    # Update PKG_CONFIG_PATH and LD_LIBRARY_PATH
+    export PKG_CONFIG_PATH="$INSTALL_DIR/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+    export LD_LIBRARY_PATH="$INSTALL_DIR/lib:${LD_LIBRARY_PATH:-}"
+    export CPPFLAGS="-I$INSTALL_DIR/include ${CPPFLAGS:-}"
+    export LDFLAGS="-L$INSTALL_DIR/lib ${LDFLAGS:-}"
+    
+    # Clean up
+    cd "$INSTALL_DIR/src"
+    rm -rf "$NCURSES_DIR" "ncurses-$NCURSES_VERSION.tar.gz"
+    
+    return 0
+}
+
 # Function to install zsh from source to ~/.local/bin
 install_zsh_local() {
     local ZSH_VERSION="5.9"
@@ -90,42 +129,48 @@ install_zsh_local() {
     fi
     
     if [ ${#missing_tools[@]} -gt 0 ]; then
-        warn "Missing build dependencies: ${missing_tools[*]}"
-        warn "Zsh compilation requires these tools to be installed first."
-        warn ""
-        warn "Please install them manually and run the script again:"
-        if command -v apt-get >/dev/null 2>&1; then
-            warn "  sudo apt-get update"
-            warn "  sudo apt-get install build-essential libncurses5-dev libncursesw5-dev"
-        elif command -v yum >/dev/null 2>&1; then
-            warn "  sudo yum install gcc make ncurses-devel"
-        elif command -v dnf >/dev/null 2>&1; then
-            warn "  sudo dnf install gcc make ncurses-devel"
-        elif command -v pacman >/dev/null 2>&1; then
-            warn "  sudo pacman -S gcc make ncurses"
-        elif command -v apk >/dev/null 2>&1; then
-            warn "  sudo apk add gcc make ncurses-dev"
+        # Check if we only miss ncurses but have gcc/make
+        has_build_tools=true
+        for tool in gcc make; do
+            if ! command -v "$tool" >/dev/null 2>&1; then
+                has_build_tools=false
+                break
+            fi
+        done
+        
+        if [ "$has_build_tools" = true ] && [[ " ${missing_tools[*]} " == *" ncurses-dev "* ]]; then
+            # We have build tools but missing ncurses - try to compile it
+            warn "Missing ncurses development headers. Attempting to compile ncurses locally..."
+            if install_ncurses_local "$INSTALL_DIR"; then
+                info "Ncurses compiled successfully. Continuing with zsh compilation..."
+            else
+                warn "Failed to compile ncurses. Proceeding anyway - zsh configure will use fallback."
+            fi
         else
-            warn "  Install gcc, make, and ncurses development headers for your system"
+            # Missing critical build tools
+            warn "Missing essential build dependencies: ${missing_tools[*]}"
+            warn ""
+            warn "For server environments, please ask your administrator to install:"
+            if command -v apt-get >/dev/null 2>&1; then
+                warn "  sudo apt-get install build-essential libncurses5-dev libncursesw5-dev"
+            elif command -v yum >/dev/null 2>&1; then
+                warn "  sudo yum install gcc make ncurses-devel"
+            elif command -v dnf >/dev/null 2>&1; then
+                warn "  sudo dnf install gcc make ncurses-devel"
+            else
+                warn "  gcc, make, and ncurses development headers"
+            fi
+            warn ""
+            warn "Or if you have personal server access:"
+            if command -v apt-get >/dev/null 2>&1; then
+                warn "  sudo apt-get install zsh (faster)"
+            elif command -v yum >/dev/null 2>&1; then
+                warn "  sudo yum install zsh (faster)"
+            elif command -v dnf >/dev/null 2>&1; then
+                warn "  sudo dnf install zsh (faster)"
+            fi
+            err "Cannot compile without build tools. Install gcc/make first."
         fi
-        warn ""
-        info "RECOMMENDED: Install zsh directly from your package manager instead:"
-        if command -v apt-get >/dev/null 2>&1; then
-            info "  sudo apt-get install zsh"
-        elif command -v yum >/dev/null 2>&1; then
-            info "  sudo yum install zsh"
-        elif command -v dnf >/dev/null 2>&1; then
-            info "  sudo dnf install zsh"
-        elif command -v pacman >/dev/null 2>&1; then
-            info "  sudo pacman -S zsh"
-        elif command -v apk >/dev/null 2>&1; then
-            info "  sudo apk add zsh"
-        fi
-        warn ""
-        warn "This is much faster and doesn't require compilation!"
-        warn "After installing zsh, you can run this script again to configure it."
-        warn ""
-        err "Cannot compile zsh without build dependencies. Please install zsh via package manager or install build tools first."
     fi
     
     # Download and extract zsh source
@@ -141,8 +186,17 @@ install_zsh_local() {
     tar -xf "zsh-$ZSH_VERSION.tar.xz" || err "Failed to extract zsh source"
     cd "zsh-$ZSH_VERSION"
     
-    # Configure and compile
+    # Configure and compile (use local ncurses if available)
     info "Configuring zsh build..."
+    
+    # Set up environment for local ncurses if it exists
+    if [ -f "$INSTALL_DIR/lib/libncursesw.so" ] || [ -f "$INSTALL_DIR/lib/libncursesw.a" ]; then
+        info "Using locally compiled ncurses..."
+        export PKG_CONFIG_PATH="$INSTALL_DIR/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+        export CPPFLAGS="-I$INSTALL_DIR/include ${CPPFLAGS:-}"
+        export LDFLAGS="-L$INSTALL_DIR/lib ${LDFLAGS:-}"
+    fi
+    
     ./configure --prefix="$INSTALL_DIR" --enable-multibyte --enable-function-subdirs \
                 --with-tcsetpgrp --enable-pcre --enable-cap --enable-zsh-secure-free || err "Failed to configure zsh"
     
