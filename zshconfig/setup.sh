@@ -97,6 +97,7 @@ install_ncurses_local() {
     cd "$INSTALL_DIR/src"
     rm -rf "$NCURSES_DIR" "ncurses-$NCURSES_VERSION.tar.gz"
     
+    ok "ncurses installed successfully to $INSTALL_DIR"
     return 0
 }
 
@@ -214,19 +215,27 @@ install_zsh_local() {
     # Configure and compile (use local ncurses if available)
     info "Configuring zsh build..."
     
-    # Set up environment for local ncurses if it exists (ONLY check for shared library)
-    if [ -f "$INSTALL_DIR/lib/libncursesw.so" ]; then
+    # Always set up environment variables for local installation paths
+    export PKG_CONFIG_PATH="$INSTALL_DIR/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+    export LD_LIBRARY_PATH="$INSTALL_DIR/lib:${LD_LIBRARY_PATH:-}"
+    export LIBRARY_PATH="$INSTALL_DIR/lib:${LIBRARY_PATH:-}"
+    export C_INCLUDE_PATH="$INSTALL_DIR/include:${C_INCLUDE_PATH:-}"
+    export CPPFLAGS="-I$INSTALL_DIR/include -I$INSTALL_DIR/include/ncursesw ${CPPFLAGS:-}"
+    export LDFLAGS="-L$INSTALL_DIR/lib -Wl,-rpath,$INSTALL_DIR/lib ${LDFLAGS:-}"
+    
+    # Check if we have locally compiled ncurses
+    if [ -f "$INSTALL_DIR/lib/libncursesw.so" ] || [ -f "$INSTALL_DIR/lib/libtinfow.so" ]; then
         info "Using locally compiled ncurses (shared library)..."
-        export PKG_CONFIG_PATH="$INSTALL_DIR/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
-        export LD_LIBRARY_PATH="$INSTALL_DIR/lib:${LD_LIBRARY_PATH:-}"
-        export CPPFLAGS="-I$INSTALL_DIR/include ${CPPFLAGS:-}"
-        export LDFLAGS="-L$INSTALL_DIR/lib -Wl,-rpath,$INSTALL_DIR/lib ${LDFLAGS:-}"
-        # Ensure zsh uses shared libraries
-        export LIBS="-lncursesw"
+        # Explicitly tell configure where to find ncurses
+        export LIBS="-lncursesw -ltinfow"
+        # Some systems need explicit termcap library specification
+        export ac_cv_search_tgetent="-lncursesw"
+        export ac_cv_search_tigetflag="-lncursesw"
     fi
     
     ./configure --prefix="$INSTALL_DIR" --enable-multibyte --enable-function-subdirs \
-                --with-tcsetpgrp --enable-pcre --enable-cap --enable-zsh-secure-free || err "Failed to configure zsh"
+                --with-tcsetpgrp --enable-pcre --enable-cap --enable-zsh-secure-free \
+                --with-term-lib="ncursesw tinfow" || err "Failed to configure zsh"
     
     info "Compiling zsh (this may take a few minutes)..."
     make -j$(nproc 2>/dev/null || echo 1) || err "Failed to compile zsh"
