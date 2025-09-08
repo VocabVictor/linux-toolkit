@@ -29,7 +29,18 @@ smart_download() {
 # Auto-detect if running standalone (via curl) or locally
 # When piped from curl, BASH_SOURCE might not be available
 SCRIPT_SOURCE="${BASH_SOURCE[0]:-}"
-if [ -z "$SCRIPT_SOURCE" ] || [[ "$SCRIPT_SOURCE" == *"http"* ]] || [[ ! -f "$(dirname "$SCRIPT_SOURCE")/../lib/common.sh" 2>/dev/null ]]; then
+
+# Determine if we're in standalone mode
+STANDALONE_MODE=true
+if [ -n "$SCRIPT_SOURCE" ] && [[ "$SCRIPT_SOURCE" != *"http"* ]]; then
+    # Check if common.sh exists relative to script location
+    SCRIPT_DIR="$(dirname "$SCRIPT_SOURCE" 2>/dev/null || echo "")"
+    if [ -n "$SCRIPT_DIR" ] && [ -f "$SCRIPT_DIR/../lib/common.sh" ]; then
+        STANDALONE_MODE=false
+    fi
+fi
+
+if [ "$STANDALONE_MODE" = "true" ]; then
     # Standalone mode - download common.sh
     echo "INFO: Running in standalone mode, downloading dependencies..."
     TEMP_COMMON="/tmp/toolkit_common_$(date +%s).sh"
@@ -41,7 +52,7 @@ if [ -z "$SCRIPT_SOURCE" ] || [[ "$SCRIPT_SOURCE" == *"http"* ]] || [[ ! -f "$(d
     rm -f "$TEMP_COMMON"
 else
     # Local mode - use relative path
-    source "$(dirname "$SCRIPT_SOURCE")/../lib/common.sh"
+    source "$SCRIPT_DIR/../lib/common.sh"
 fi
 
 info "Installing Zsh + Oh My Zsh setup"
