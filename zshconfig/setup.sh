@@ -83,11 +83,15 @@ install_ncurses_local() {
     info "Installing ncurses to $INSTALL_DIR..."
     make install >/dev/null 2>&1 || return 1
     
+    # CRITICAL: Remove ALL static libraries to force dynamic linking
+    info "Removing static libraries to ensure dynamic linking..."
+    rm -f "$INSTALL_DIR/lib"/*.a 2>/dev/null
+    
     # Update PKG_CONFIG_PATH and LD_LIBRARY_PATH
     export PKG_CONFIG_PATH="$INSTALL_DIR/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
     export LD_LIBRARY_PATH="$INSTALL_DIR/lib:${LD_LIBRARY_PATH:-}"
     export CPPFLAGS="-I$INSTALL_DIR/include ${CPPFLAGS:-}"
-    export LDFLAGS="-L$INSTALL_DIR/lib ${LDFLAGS:-}"
+    export LDFLAGS="-L$INSTALL_DIR/lib -Wl,-rpath,$INSTALL_DIR/lib ${LDFLAGS:-}"
     
     # Clean up
     cd "$INSTALL_DIR/src"
@@ -210,12 +214,15 @@ install_zsh_local() {
     # Configure and compile (use local ncurses if available)
     info "Configuring zsh build..."
     
-    # Set up environment for local ncurses if it exists
-    if [ -f "$INSTALL_DIR/lib/libncursesw.so" ] || [ -f "$INSTALL_DIR/lib/libncursesw.a" ]; then
-        info "Using locally compiled ncurses..."
+    # Set up environment for local ncurses if it exists (ONLY check for shared library)
+    if [ -f "$INSTALL_DIR/lib/libncursesw.so" ]; then
+        info "Using locally compiled ncurses (shared library)..."
         export PKG_CONFIG_PATH="$INSTALL_DIR/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+        export LD_LIBRARY_PATH="$INSTALL_DIR/lib:${LD_LIBRARY_PATH:-}"
         export CPPFLAGS="-I$INSTALL_DIR/include ${CPPFLAGS:-}"
-        export LDFLAGS="-L$INSTALL_DIR/lib ${LDFLAGS:-}"
+        export LDFLAGS="-L$INSTALL_DIR/lib -Wl,-rpath,$INSTALL_DIR/lib ${LDFLAGS:-}"
+        # Ensure zsh uses shared libraries
+        export LIBS="-lncursesw"
     fi
     
     ./configure --prefix="$INSTALL_DIR" --enable-multibyte --enable-function-subdirs \
