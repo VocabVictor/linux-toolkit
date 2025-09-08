@@ -216,6 +216,16 @@ alias free='free -h'
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 EOF
 
+# Download p10k configuration if not exists
+if [ ! -f ~/.p10k.zsh ]; then
+    info "Downloading Powerlevel10k configuration..."
+    smart_download "https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zshconfig/p10k.zsh" ~/.p10k.zsh || {
+        warn "Failed to download p10k.zsh configuration, you can configure it manually later"
+    }
+else
+    info "Powerlevel10k configuration already exists"
+fi
+
 ok "Zsh setup completed successfully!"
 echo
 info "Next steps:"
