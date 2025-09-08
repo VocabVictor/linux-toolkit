@@ -64,17 +64,38 @@ install_zsh_local() {
         fi
     done
     
-    # Check for ncurses development headers
-    if ! pkg-config --exists ncurses 2>/dev/null && ! pkg-config --exists ncursesw 2>/dev/null; then
-        if [ ! -f /usr/include/ncurses.h ] && [ ! -f /usr/include/ncursesw/ncurses.h ]; then
-            missing_tools+=("ncurses-dev")
+    # Check for ncurses development headers - try multiple locations
+    has_ncurses=false
+    for ncurses_path in \
+        /usr/include/ncurses.h \
+        /usr/include/ncursesw/ncurses.h \
+        /usr/include/ncurses/ncurses.h \
+        /usr/local/include/ncurses.h \
+        /usr/local/include/ncursesw/ncurses.h \
+        "$HOME/.local/include/ncurses.h" \
+        "$HOME/.local/include/ncursesw/ncurses.h"; do
+        if [ -f "$ncurses_path" ]; then
+            has_ncurses=true
+            break
         fi
+    done
+    
+    # Also check if pkg-config can find ncurses
+    if pkg-config --exists ncurses 2>/dev/null || pkg-config --exists ncursesw 2>/dev/null; then
+        has_ncurses=true
+    fi
+    
+    if [ "$has_ncurses" = false ]; then
+        missing_tools+=("ncurses-dev")
     fi
     
     if [ ${#missing_tools[@]} -gt 0 ]; then
         warn "Missing build dependencies: ${missing_tools[*]}"
-        warn "Please install them manually:"
+        warn "Zsh compilation requires these tools to be installed first."
+        warn ""
+        warn "Please install them manually and run the script again:"
         if command -v apt-get >/dev/null 2>&1; then
+            warn "  sudo apt-get update"
             warn "  sudo apt-get install build-essential libncurses5-dev libncursesw5-dev"
         elif command -v yum >/dev/null 2>&1; then
             warn "  sudo yum install gcc make ncurses-devel"
@@ -82,10 +103,29 @@ install_zsh_local() {
             warn "  sudo dnf install gcc make ncurses-devel"
         elif command -v pacman >/dev/null 2>&1; then
             warn "  sudo pacman -S gcc make ncurses"
+        elif command -v apk >/dev/null 2>&1; then
+            warn "  sudo apk add gcc make ncurses-dev"
         else
             warn "  Install gcc, make, and ncurses development headers for your system"
         fi
-        warn "Continuing anyway - build may fail without these dependencies"
+        warn ""
+        info "RECOMMENDED: Install zsh directly from your package manager instead:"
+        if command -v apt-get >/dev/null 2>&1; then
+            info "  sudo apt-get install zsh"
+        elif command -v yum >/dev/null 2>&1; then
+            info "  sudo yum install zsh"
+        elif command -v dnf >/dev/null 2>&1; then
+            info "  sudo dnf install zsh"
+        elif command -v pacman >/dev/null 2>&1; then
+            info "  sudo pacman -S zsh"
+        elif command -v apk >/dev/null 2>&1; then
+            info "  sudo apk add zsh"
+        fi
+        warn ""
+        warn "This is much faster and doesn't require compilation!"
+        warn "After installing zsh, you can run this script again to configure it."
+        warn ""
+        err "Cannot compile zsh without build dependencies. Please install zsh via package manager or install build tools first."
     fi
     
     # Download and extract zsh source
