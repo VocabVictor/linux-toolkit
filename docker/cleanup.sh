@@ -1,56 +1,12 @@
 #!/bin/bash
-# Linux Toolkit - Docker cleanup (standalone capable)
-# Usage: curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/docker/cleanup.sh | bash
+# Linux Toolkit - Docker cleanup
 # Copyright (c) 2025 Linux Toolkit. MIT License.
 
 set -euo pipefail
 
-# Smart download function
-smart_download() {
-    local url="$1"
-    local output_file="$2"
-    local use_proxy="${GITHUB_PROXY:-true}"
-    
-    if [ "$use_proxy" = "true" ] && [[ "$url" == *"raw.githubusercontent.com"* ]]; then
-        local proxy_url="https://gh-proxy.com/$url"
-        echo "INFO: Using GitHub proxy for better connectivity..."
-        if curl -fsSL --connect-timeout 10 "$proxy_url" > "$output_file" 2>/dev/null; then
-            return 0
-        else
-            echo "WARN: Proxy failed, trying direct connection..." >&2
-        fi
-    fi
-    curl -fsSL "$url" > "$output_file" || return 1
-}
-
-# Auto-detect if running standalone (via curl) or locally
-# When piped from curl, BASH_SOURCE might not be available
-SCRIPT_SOURCE="${BASH_SOURCE[0]:-}"
-
-# Determine if we're in standalone mode
-STANDALONE_MODE=true
-if [ -n "$SCRIPT_SOURCE" ] && [[ "$SCRIPT_SOURCE" != *"http"* ]]; then
-    # Check if common.sh exists relative to script location
-    SCRIPT_DIR="$(dirname "$SCRIPT_SOURCE" 2>/dev/null || echo "")"
-    if [ -n "$SCRIPT_DIR" ] && [ -f "$SCRIPT_DIR/../lib/common.sh" ]; then
-        STANDALONE_MODE=false
-    fi
-fi
-
-if [ "$STANDALONE_MODE" = "true" ]; then
-    # Standalone mode - download common.sh
-    echo "INFO: Running in standalone mode, downloading dependencies..."
-    TEMP_COMMON="/tmp/toolkit_common_$(date +%s).sh"
-    smart_download "https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/lib/common.sh" "$TEMP_COMMON" || {
-        echo "ERROR: Failed to download common utilities" >&2
-        exit 1
-    }
-    source "$TEMP_COMMON"
-    rm -f "$TEMP_COMMON"
-else
-    # Local mode - use relative path
-    source "$SCRIPT_DIR/../lib/common.sh"
-fi
+# Source common utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/common.sh"
 
 check_cmd docker
 

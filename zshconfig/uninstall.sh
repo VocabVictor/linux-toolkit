@@ -2,7 +2,8 @@
 # Linux Toolkit - Zsh uninstaller
 # Copyright (c) 2025 Linux Toolkit. MIT License.
 
-source "$(dirname "$0")/../lib/common.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/common.sh"
 
 info "Uninstalling Oh My Zsh configuration"
 

@@ -2,7 +2,8 @@
 # Linux Toolkit - Home directory backup
 # Copyright (c) 2025 Linux Toolkit. MIT License.
 
-source "$(dirname "$0")/../lib/common.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/common.sh"
 
 readonly BDIR="${BACKUP_DIR:-/backup/home}"
 readonly MAX="${MAX_BACKUPS:-7}"
@@ -50,13 +51,14 @@ backup() {
     local count=$(find "$BDIR" -name "home_*.tar.gz" -type f | wc -l)
     if [ "$count" -gt "$MAX" ]; then
         # Remove oldest files
-        find "$BDIR" -name "home_*.tar.gz" -type f -printf '%T@ %p\n' | sort -n | head -n $((count - MAX)) | cut -d' ' -f2- | xargs rm -f
+        # POSIX-compatible: use ls -t for sorting by time
+        ls -t "$BDIR"/home_*.tar.gz 2>/dev/null | tail -n +$((MAX + 1)) | xargs rm -f 2>/dev/null || true
         info "removed $((count - MAX)) old backups"
     fi
 }
 
 case "${1:-backup}" in
     backup) init_exclude; backup ;;
-    list) find "$BDIR" -name "home_*.tar.gz" -printf '%TY-%Tm-%Td %TH:%TM %s %p\n' | sort -r ;;
+    list) ls -lh "$BDIR"/home_*.tar.gz 2>/dev/null | sort -r ;;
     *) err "usage: $0 {backup|list}" ;;
 esac

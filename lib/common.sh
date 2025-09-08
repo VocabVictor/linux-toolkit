@@ -4,14 +4,8 @@
 
 set -euo pipefail
 
-# Dynamic import - can be sourced remotely
-if [[ "${BASH_SOURCE[0]}" == *"http"* ]] || [[ ! -f "${BASH_SOURCE[0]}" ]]; then
-    TOOLKIT_REMOTE=true
-    TOOLKIT_BASE_URL="https://raw.githubusercontent.com/user/linux-toolkit/main"
-else
-    TOOLKIT_REMOTE=false
-    TOOLKIT_BASE_URL="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-fi
+# Set toolkit base directory
+TOOLKIT_BASE_URL="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Color support detection
 if [ -t 1 ] && [ "${TERM:-}" != "dumb" ]; then
@@ -77,37 +71,24 @@ confirm() {
     [[ ${reply:-} =~ ^[Yy]$ ]]
 }
 
-# Smart download function with GitHub proxy support
+# Smart download function with timeout
 smart_download() {
     local url="$1"
     local output_file="$2"
-    local use_proxy="${GITHUB_PROXY:-true}"
+    local timeout="${3:-30}"
     
-    # Add GitHub proxy for mainland China users
-    if [ "$use_proxy" = "true" ] && [[ "$url" == *"raw.githubusercontent.com"* ]]; then
-        local proxy_url="https://gh-proxy.com/$url"
-        info "Using GitHub proxy for better connectivity..."
-        if curl -fsSL --connect-timeout 10 "$proxy_url" > "$output_file" 2>/dev/null; then
-            return 0
-        else
-            warn "Proxy failed, trying direct connection..."
-        fi
+    # Direct download with timeout
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL --connect-timeout "$timeout" --max-time $((timeout * 2)) "$url" > "$output_file" || return 1
+    elif command -v wget >/dev/null 2>&1; then
+        wget -q -O "$output_file" --timeout="$timeout" "$url" || return 1
+    else
+        err "Neither curl nor wget available for download"
     fi
-    
-    # Fallback to direct download
-    curl -fsSL "$url" > "$output_file" || return 1
 }
 
-# Enhanced import function with smart download
-import_remote() {
+# Import local script
+import_script() {
     local script_path="$1"
-    local temp_file="/tmp/toolkit_$(basename "$script_path")"
-    
-    if [ "$TOOLKIT_REMOTE" = "true" ]; then
-        smart_download "$TOOLKIT_BASE_URL/$script_path" "$temp_file" || err "Failed to download $script_path"
-        source "$temp_file"
-        rm -f "$temp_file"
-    else
-        source "$TOOLKIT_BASE_URL/$script_path"
-    fi
+    source "$TOOLKIT_BASE_URL/$script_path"
 }
