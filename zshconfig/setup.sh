@@ -56,14 +56,36 @@ install_zsh_local() {
     # Create directories
     mkdir -p "$INSTALL_DIR/bin" "$INSTALL_DIR/src"
     
-    # Install build dependencies if possible
-    if command -v apt-get >/dev/null 2>&1; then
-        info "Installing build dependencies..."
-        sudo apt-get update && sudo apt-get install -y build-essential libncurses5-dev libncursesw5-dev 2>/dev/null || true
-    elif command -v yum >/dev/null 2>&1; then
-        sudo yum install -y gcc make ncurses-devel 2>/dev/null || true
-    elif command -v dnf >/dev/null 2>&1; then
-        sudo dnf install -y gcc make ncurses-devel 2>/dev/null || true
+    # Check for required build tools
+    local missing_tools=()
+    for tool in gcc make; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            missing_tools+=("$tool")
+        fi
+    done
+    
+    # Check for ncurses development headers
+    if ! pkg-config --exists ncurses 2>/dev/null && ! pkg-config --exists ncursesw 2>/dev/null; then
+        if [ ! -f /usr/include/ncurses.h ] && [ ! -f /usr/include/ncursesw/ncurses.h ]; then
+            missing_tools+=("ncurses-dev")
+        fi
+    fi
+    
+    if [ ${#missing_tools[@]} -gt 0 ]; then
+        warn "Missing build dependencies: ${missing_tools[*]}"
+        warn "Please install them manually:"
+        if command -v apt-get >/dev/null 2>&1; then
+            warn "  sudo apt-get install build-essential libncurses5-dev libncursesw5-dev"
+        elif command -v yum >/dev/null 2>&1; then
+            warn "  sudo yum install gcc make ncurses-devel"
+        elif command -v dnf >/dev/null 2>&1; then
+            warn "  sudo dnf install gcc make ncurses-devel"
+        elif command -v pacman >/dev/null 2>&1; then
+            warn "  sudo pacman -S gcc make ncurses"
+        else
+            warn "  Install gcc, make, and ncurses development headers for your system"
+        fi
+        warn "Continuing anyway - build may fail without these dependencies"
     fi
     
     # Download and extract zsh source

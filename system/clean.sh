@@ -36,14 +36,18 @@ fi
 
 info "Starting system cleanup"
 
-# Clean package cache
+# Clean package cache (user-accessible only)
 if command -v apt >/dev/null; then
-    info "Cleaning apt cache..."
-    sudo apt autoclean >/dev/null 2>&1 || warn "apt autoclean failed"
-    sudo apt autoremove -y >/dev/null 2>&1 || warn "apt autoremove failed"
+    info "Cleaning apt cache (user accessible)..."
+    # Only clean user-accessible cache directories
+    [ -d ~/.cache/apt ] && rm -rf ~/.cache/apt/* 2>/dev/null || true
+    warn "System package cache requires admin privileges to clean"
+    warn "Run manually: sudo apt autoclean && sudo apt autoremove"
 elif command -v yum >/dev/null; then
-    info "Cleaning yum cache..."
-    sudo yum clean all >/dev/null 2>&1 || warn "yum clean failed"
+    info "Cleaning yum cache (user accessible)..."
+    [ -d ~/.cache/yum ] && rm -rf ~/.cache/yum/* 2>/dev/null || true
+    warn "System package cache requires admin privileges to clean"
+    warn "Run manually: sudo yum clean all"
 fi
 
 # Clean user caches
