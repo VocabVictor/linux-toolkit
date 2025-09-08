@@ -54,31 +54,31 @@ install_ncurses_local() {
     cd "$NCURSES_DIR"
     
     info "Configuring ncurses..."
-    # Export flags to ensure they persist through the entire build process
+    # Export ALL necessary flags to ensure they persist through the entire build process
     export CFLAGS="-fPIC -O2"
-    export CXXFLAGS="-fPIC -O2"
     export CPPFLAGS="-I$INSTALL_DIR/include"
     export LDFLAGS="-L$INSTALL_DIR/lib"
     
+    # Configure with shared libraries ONLY and skip C++ to avoid linking issues
     ./configure \
         --prefix="$INSTALL_DIR" \
         --enable-shared \
-        --enable-static \
+        --disable-static \
         --enable-widec \
         --without-debug \
         --without-ada \
+        --without-cxx \
+        --without-cxx-binding \
         --enable-overwrite \
         --with-shared \
-        --with-cxx-shared \
         --enable-pc-files \
         --with-pkg-config-libdir="$INSTALL_DIR/lib/pkgconfig" \
-        --with-normal \
-        --with-pic \
+        --with-termlib \
         >/dev/null 2>&1 || return 1
     
     info "Compiling ncurses (this may take a few minutes)..."
-    # Explicitly set flags for make as well
-    make -j$(nproc 2>/dev/null || echo 1) CFLAGS="-fPIC -O2" CXXFLAGS="-fPIC -O2" >/dev/null 2>&1 || return 1
+    # Force PIC compilation for all objects, only build libs and headers (not programs/C++)
+    make -j$(nproc 2>/dev/null || echo 1) CFLAGS="-fPIC -O2" libs >/dev/null 2>&1 || return 1
     
     info "Installing ncurses to $INSTALL_DIR..."
     make install >/dev/null 2>&1 || return 1
