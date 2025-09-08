@@ -2,38 +2,55 @@
 
 Linux 实用工具脚本集合，提供系统管理和开发环境配置的自动化解决方案。
 
-## 项目结构
+## 架构设计
+
+### 项目结构
 
 ```
 linux-toolkit/
-├── lib/                # 公共函数库
-├── zshconfig/          # Zsh 配置工具
-│   ├── setup.sh        # 安装脚本
-│   └── uninstall.sh    # 卸载脚本  
-├── system/             # 系统管理工具
-│   ├── clean.sh        # 系统清理
-│   └── info.sh         # 系统信息
-├── network/            # 网络工具
-│   └── speed.sh        # 网络测试
-├── docker/             # Docker 管理
-│   └── cleanup.sh      # Docker 清理
-└── backup/             # 备份工具
-    └── home.sh         # 家目录备份
+├── lib/
+│   └── common.sh       # 统一函数库 (无代码重复)
+├── zshconfig/          # Zsh 配置模块
+│   ├── setup.sh        # 自动安装配置
+│   └── uninstall.sh    # 清理卸载
+├── system/             # 系统管理模块
+│   ├── clean.sh        # 智能系统清理
+│   └── info.sh         # 系统信息查看
+├── network/            # 网络工具模块
+│   └── speed.sh        # 网络性能测试
+├── docker/             # Docker 管理模块
+│   └── cleanup.sh      # 容器镜像清理
+└── backup/             # 数据备份模块
+    └── home.sh         # 个人文件备份
 ```
+
+### 双模式执行架构
+
+每个脚本都支持两种执行模式：
+
+1. **本地执行**: 使用本地 `lib/common.sh`
+2. **远程执行**: 自动下载 `common.sh` 到临时文件
+
+此设计消除了代码重复，统一了日志输出、错误处理和公共工具函数。
 
 ## 快速开始
 
-### 一键安装脚本
+### 一键执行脚本 (推荐)
+
+脚本支持独立执行，自动下载依赖库：
 
 ```bash
-# Zsh 配置
+# Zsh 配置 (自动下载 common.sh)
 curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zshconfig/setup.sh | bash
 
-# 系统清理
+# 系统清理 (自动下载 common.sh)
 curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/system/clean.sh | bash
 
-# Docker 清理
+# Docker 清理 (自动下载 common.sh)
 curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/docker/cleanup.sh | bash
+
+# 网络测速 (自动下载 common.sh)
+curl -fsSL https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/network/speed.sh | bash
 ```
 
 ### 本地安装
@@ -47,83 +64,75 @@ make test     # 运行测试
 
 ## 功能模块
 
-### Zsh 配置 (zshconfig)
+### Zsh 环境配置 (zshconfig)
 
-自动安装和配置 Oh My Zsh + Powerlevel10k 主题。
+自动安装 Oh My Zsh + Powerlevel10k，支持无 root 权限安装。
 
-**功能:**
-- Oh My Zsh 框架安装
-- Powerlevel10k 主题配置
-- 常用插件启用 (语法高亮、自动补全)
-- 配置文件自动备份
+**特性**: 框架安装、主题美化、语法高亮、智能补全、配置备份
 
-**使用:**
 ```bash
-./zshconfig/setup.sh     # 安装
-./zshconfig/uninstall.sh # 卸载
+# 本地执行
+./zshconfig/setup.sh
+./zshconfig/uninstall.sh
 ```
 
 ### 系统管理 (system)
 
-系统清理和信息查看工具。
-
-**包含脚本:**
-- `clean.sh` - 清理包缓存、临时文件、日志文件
-- `info.sh` - 显示系统基本信息
+**智能清理**: `clean.sh` - 安全清理包缓存、临时文件、旧日志（保留系统关键文件）
+**系统信息**: `info.sh` - 显示系统配置和资源使用情况
 
 ### Docker 管理 (docker)
 
-Docker 容器和镜像清理工具。
-
-**包含脚本:**
-- `cleanup.sh` - 清理停止的容器、未使用的镜像和卷
+**全面清理**: `cleanup.sh` - 一键清理停止容器、无用镜像、卷、网络和构建缓存
 
 ### 网络工具 (network)
 
-网络测试和诊断工具。
+**速度测试**: `speed.sh` - 自动安装 speedtest-cli，检测上下行带宽和延迟
 
-**包含脚本:**
-- `speed.sh` - 网络速度测试
+### 数据备份 (backup)
 
-### 备份工具 (backup)
+**个人备份**: `home.sh` - 智能备份配置文件、SSH 密钥、重要数据
 
-数据备份和恢复脚本。
+## 配置选项
 
-**包含脚本:**
-- `home.sh` - 家目录重要文件备份
-
-## 环境变量
+支持环境变量控制脚本行为：
 
 ```bash
-# 禁用 GitHub 代理
-GITHUB_PROXY=false curl -fsSL <script_url> | bash
-
-# 静默模式
+# 静默模式 (非交互执行)
 BATCH=true curl -fsSL <script_url> | bash
+
+# CI 环境模式
+CI=true curl -fsSL <script_url> | bash
+
+# 自定义下载超时 (秒)
+DOWNLOAD_TIMEOUT=60 curl -fsSL <script_url> | bash
 ```
 
-## 支持的系统
+## 系统支持
 
-- Ubuntu/Debian
-- CentOS/RHEL  
-- Arch Linux
-- macOS (部分功能)
+| 系统 | 状态 | 说明 |
+|------|------|------|
+| Ubuntu/Debian | ✅ 全支持 | apt 包管理器 |
+| CentOS/RHEL | ✅ 全支持 | yum/dnf 包管理器 |
+| Arch Linux | ✅ 全支持 | pacman 包管理器 |
+| macOS | ⚠️ 部分支持 | 不支持系统清理功能 |
 
-## 开发
-
-### 本地测试
+## 开发指南
 
 ```bash
-make deps     # 安装依赖
-make test     # 语法检查
-make lint     # 代码质量检查
+make deps     # 安装开发依赖 (shellcheck)
+make test     # 语法校验所有脚本
+make lint     # shellcheck 代码质量检查
+make install  # 安装到 ~/bin 目录
 ```
 
-### 目录说明
+### 技术特性
 
-- `lib/` - 公共函数库，被其他脚本引用
-- 各模块目录包含独立的功能脚本
-- 脚本支持独立运行和远程一键执行两种模式
+- **零依赖**: 远程执行无需安装，自动下载依赖
+- **双模式**: 本地开发 + 远程一键部署
+- **错误处理**: 统一的异常处理和日志输出
+- **安全性**: 临时文件自动清理，`set -euo pipefail`
+- **兼容性**: 支持 curl/wget，多发行版兼容
 
 ## 许可证
 

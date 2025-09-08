@@ -42,22 +42,47 @@ make lint    # Check shell scripts with shellcheck
 ## Code Standards
 
 ### Shell Scripts
-- Use `set -euo pipefail` for error handling
-- Source common.sh for local execution
-- Provide inline functions for remote execution
-- Use consistent error/info/warn/ok functions
+- Use `set -euo pipefail` for ALL executable scripts (no exceptions)
+- NEVER duplicate function definitions - use download pattern instead
+- For standalone execution: download common.sh to temp file, not inline functions
+- Use consistent error/info/warn/ok functions from common.sh only
+
+### Standalone Mode Architecture
+Scripts supporting remote execution (curl pipe) must:
+1. Detect execution mode (local vs remote)
+2. Download common.sh when in remote mode
+3. Use trap to clean up temp files
+4. NEVER duplicate function code inline
+
+Example pattern:
+```bash
+if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+    # Local execution
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    source "$SCRIPT_DIR/../lib/common.sh"
+else
+    # Remote execution - download common.sh
+    TEMP_COMMON="/tmp/common_$$.sh"
+    trap "rm -f $TEMP_COMMON" EXIT
+    curl -fsSL "https://raw.githubusercontent.com/.../common.sh" > "$TEMP_COMMON"
+    source "$TEMP_COMMON"
+fi
+```
 
 ### Documentation
 - No emojis in technical documentation
 - Use clear, concise language
 - Keep README focused on essential information
 - Avoid marketing language
+- Document the dual-mode architecture clearly
 
 ## Recent Changes
 - Renamed `zsh-config/` to `zshconfig/` for consistency
 - Fixed sourcing patterns to use `BASH_SOURCE` consistently
-- Removed duplicate smart_download functions
-- Eliminated unsafe curl|bash patterns from documentation
+- Eliminated ALL code duplication - scripts now download common.sh when needed
+- Added `set -euo pipefail` to all executable scripts
+- Removed documentation files from functional directories
+- Implemented proper standalone mode without inline function duplication
 
 ## GitHub Repository
 - Repository: VocabVictor/linux-toolkit
