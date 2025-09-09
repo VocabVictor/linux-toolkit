@@ -60,7 +60,7 @@ install_ncurses_local() {
     export LDFLAGS="-L$INSTALL_DIR/lib"
     
     # Configure with shared libraries ONLY and skip C++ to avoid linking issues
-    ./configure \
+    if ! ./configure \
         --prefix="$INSTALL_DIR" \
         --enable-shared \
         --disable-static \
@@ -74,14 +74,23 @@ install_ncurses_local() {
         --enable-pc-files \
         --with-pkg-config-libdir="$INSTALL_DIR/lib/pkgconfig" \
         --with-termlib \
-        >/dev/null 2>&1 || return 1
+        >/dev/null 2>&1; then
+        warn "ncurses configure failed. Check $NCURSES_DIR/config.log for details"
+        return 1
+    fi
     
     info "Compiling ncurses (this may take a few minutes)..."
     # Force PIC compilation for all objects, only build libs and headers (not programs/C++)
-    make -j$(nproc 2>/dev/null || echo 1) CFLAGS="-fPIC -O2" libs >/dev/null 2>&1 || return 1
+    if ! make -j$(nproc 2>/dev/null || echo 1) CFLAGS="-fPIC -O2" libs >/dev/null 2>&1; then
+        warn "ncurses compilation failed"
+        return 1
+    fi
     
     info "Installing ncurses to $INSTALL_DIR..."
-    make install >/dev/null 2>&1 || return 1
+    if ! make install.libs >/dev/null 2>&1; then
+        warn "ncurses installation failed"
+        return 1
+    fi
     
     # Remove only ncurses-related static libraries to force dynamic linking
     # Be careful to NOT remove other software's static libraries
@@ -99,6 +108,17 @@ install_ncurses_local() {
     export LD_LIBRARY_PATH="$INSTALL_DIR/lib:${LD_LIBRARY_PATH:-}"
     export CPPFLAGS="-I$INSTALL_DIR/include ${CPPFLAGS:-}"
     export LDFLAGS="-L$INSTALL_DIR/lib -Wl,-rpath,$INSTALL_DIR/lib ${LDFLAGS:-}"
+    
+    # Verify installation
+    if [ ! -f "$INSTALL_DIR/lib/libncursesw.so" ]; then
+        warn "ncurses shared library not found after installation"
+        return 1
+    fi
+    
+    if [ ! -f "$INSTALL_DIR/include/ncurses.h" ] && [ ! -f "$INSTALL_DIR/include/ncursesw/ncurses.h" ]; then
+        warn "ncurses headers not found after installation"
+        return 1
+    fi
     
     # Clean up
     cd "$INSTALL_DIR/src"
@@ -176,8 +196,10 @@ install_zsh_local() {
             warn "Missing ncurses development headers. Attempting to compile ncurses locally..."
             if install_ncurses_local "$INSTALL_DIR"; then
                 info "Ncurses compiled successfully. Continuing with zsh compilation..."
+                # Re-check for ncurses after compilation
+                has_ncurses=true
             else
-                warn "Failed to compile ncurses. Proceeding anyway - zsh configure will use fallback."
+                err "Failed to compile ncurses. Cannot continue without terminal library."
             fi
         else
             # Missing critical build tools
