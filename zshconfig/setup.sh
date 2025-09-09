@@ -3,10 +3,8 @@
 # Usage: ./zshconfig/setup.sh
 # Copyright (c) 2025 Linux Toolkit. MIT License.
 
-set -euo pipefail
-
 # Source functions - download if needed (for curl | bash support)
-if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]:-/dev/null}" ]; then
     # Local execution - use local common.sh
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     source "$SCRIPT_DIR/../lib/common.sh"
@@ -33,6 +31,9 @@ else
     
     source "$TEMP_COMMON"
 fi
+
+# Set strict mode after BASH_SOURCE handling
+set -euo pipefail
 
 info "Installing Zsh + Oh My Zsh setup"
 
