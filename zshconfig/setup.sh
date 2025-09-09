@@ -300,40 +300,26 @@ setopt SHARE_HISTORY
 [[ -d ~/.local/bin ]] && export PATH="$HOME/.local/bin:$PATH"
 EOF
 
-# Create basic Powerlevel10k config if not exists
+# Install custom p10k config from repository if not exists
 if [ ! -f ~/.p10k.zsh ]; then
-    info "Creating basic Powerlevel10k configuration..."
-    cat > ~/.p10k.zsh << 'EOF'
-# Powerlevel10k configuration - Run `p10k configure` to customize
-
-typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
-    dir
-    vcs
-    prompt_char
-)
-
-typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
-    status
-    command_execution_time
-    time
-)
-
-# Prompt character
-typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=76
-typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=196
-
-# Directory
-typeset -g POWERLEVEL9K_DIR_FOREGROUND=31
-
-# Git
-typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND=76
-typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=76
-typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=178
-
-# Time
-typeset -g POWERLEVEL9K_TIME_FOREGROUND=66
-typeset -g POWERLEVEL9K_TIME_FORMAT='%D{%H:%M:%S}'
-EOF
+    info "Installing custom Powerlevel10k configuration..."
+    if [ -n "$TOOLKIT_BASE_DIR" ] && [ -f "$TOOLKIT_BASE_DIR/zshconfig/p10k.zsh" ]; then
+        # Local execution - copy from repository
+        cp "$TOOLKIT_BASE_DIR/zshconfig/p10k.zsh" ~/.p10k.zsh
+    else
+        # Remote execution - download from GitHub
+        if command -v curl >/dev/null 2>&1; then
+            curl -fsSL "https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zshconfig/p10k.zsh" > ~/.p10k.zsh || {
+                warn "Failed to download custom p10k config, using default"
+            }
+        elif command -v wget >/dev/null 2>&1; then
+            wget -q -O ~/.p10k.zsh "https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zshconfig/p10k.zsh" || {
+                warn "Failed to download custom p10k config, using default"
+            }
+        else
+            warn "Cannot download custom p10k config - no curl or wget available"
+        fi
+    fi
 fi
 
 ok "Zsh setup completed successfully!"
