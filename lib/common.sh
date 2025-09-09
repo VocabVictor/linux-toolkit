@@ -2,10 +2,16 @@
 # Linux Toolkit - Common utilities
 # Copyright (c) 2025 Linux Toolkit. MIT License.
 
-set -euo pipefail
+# Set toolkit base directory - handle both local and remote execution
+if [ "${#BASH_SOURCE[@]}" -gt 0 ] && [ -f "${BASH_SOURCE[0]}" ]; then
+    # Local execution - calculate relative to common.sh location
+    TOOLKIT_BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+else
+    # Remote execution - functions are standalone, no base directory needed
+    TOOLKIT_BASE_DIR=""
+fi
 
-# Set toolkit base directory
-TOOLKIT_BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+set -euo pipefail
 
 # Color support detection
 if [ -t 1 ] && [ "${TERM:-}" != "dumb" ]; then

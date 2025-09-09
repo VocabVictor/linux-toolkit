@@ -4,7 +4,8 @@
 # Copyright (c) 2025 Linux Toolkit. MIT License.
 
 # Source functions - download if needed (for curl | bash support)
-if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]:-/dev/null}" ]; then
+# Use safer BASH_SOURCE detection that works with curl | bash
+if [ "${#BASH_SOURCE[@]}" -gt 0 ] && [ -f "${BASH_SOURCE[0]}" ]; then
     # Local execution - use local common.sh
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     source "$SCRIPT_DIR/../lib/common.sh"
