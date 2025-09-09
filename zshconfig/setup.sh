@@ -219,9 +219,15 @@ if [ -f ~/.zshrc ] && [ ! -f ~/.zshrc.backup ]; then
     cp ~/.zshrc ~/.zshrc.backup
 fi
 
-if [ -f ~/.p10k.zsh ] && [ ! -f ~/.p10k.zsh.backup ]; then
-    info "Backing up existing .p10k.zsh"  
-    cp ~/.p10k.zsh ~/.p10k.zsh.backup
+# Handle existing p10k.zsh - rename to backup so install can proceed cleanly
+if [ -f ~/.p10k.zsh ]; then
+    if [ ! -f ~/.p10k.zsh.backup ]; then
+        info "Renaming existing .p10k.zsh to .p10k.zsh.backup"
+        mv ~/.p10k.zsh ~/.p10k.zsh.backup
+    else
+        info "Removing existing .p10k.zsh (backup already exists)"
+        rm -f ~/.p10k.zsh
+    fi
 fi
 
 # Install Oh My Zsh
@@ -300,25 +306,28 @@ setopt SHARE_HISTORY
 [[ -d ~/.local/bin ]] && export PATH="$HOME/.local/bin:$PATH"
 EOF
 
-# Install custom p10k config from repository if not exists
-if [ ! -f ~/.p10k.zsh ]; then
-    info "Installing custom Powerlevel10k configuration..."
-    if [ -n "$TOOLKIT_BASE_DIR" ] && [ -f "$TOOLKIT_BASE_DIR/zshconfig/p10k.zsh" ]; then
-        # Local execution - copy from repository
-        cp "$TOOLKIT_BASE_DIR/zshconfig/p10k.zsh" ~/.p10k.zsh
+# Install custom p10k config from repository (always overwrite after backup)
+info "Installing custom Powerlevel10k configuration..."
+if [ -n "$TOOLKIT_BASE_DIR" ] && [ -f "$TOOLKIT_BASE_DIR/zshconfig/p10k.zsh" ]; then
+    # Local execution - copy from repository
+    cp "$TOOLKIT_BASE_DIR/zshconfig/p10k.zsh" ~/.p10k.zsh
+    ok "Installed p10k config from local repository"
+else
+    # Remote execution - download from GitHub
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL "https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zshconfig/p10k.zsh" > ~/.p10k.zsh && {
+            ok "Downloaded p10k config from GitHub"
+        } || {
+            warn "Failed to download custom p10k config"
+        }
+    elif command -v wget >/dev/null 2>&1; then
+        wget -q -O ~/.p10k.zsh "https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zshconfig/p10k.zsh" && {
+            ok "Downloaded p10k config from GitHub"
+        } || {
+            warn "Failed to download custom p10k config"
+        }
     else
-        # Remote execution - download from GitHub
-        if command -v curl >/dev/null 2>&1; then
-            curl -fsSL "https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zshconfig/p10k.zsh" > ~/.p10k.zsh || {
-                warn "Failed to download custom p10k config, using default"
-            }
-        elif command -v wget >/dev/null 2>&1; then
-            wget -q -O ~/.p10k.zsh "https://raw.githubusercontent.com/VocabVictor/linux-toolkit/master/zshconfig/p10k.zsh" || {
-                warn "Failed to download custom p10k config, using default"
-            }
-        else
-            warn "Cannot download custom p10k config - no curl or wget available"
-        fi
+        warn "Cannot download custom p10k config - no curl or wget available"
     fi
 fi
 
