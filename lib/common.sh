@@ -93,6 +93,86 @@ smart_download() {
     fi
 }
 
+# Git network configuration functions
+setup_git_network() {
+    # Store original git configuration
+    if command -v git >/dev/null 2>&1; then
+        # Save existing configuration
+        GIT_ORIG_SSL_VERIFY=$(git config --global --get http.sslVerify 2>/dev/null || echo "")
+        GIT_ORIG_PROXY=$(git config --global --get http.proxy 2>/dev/null || echo "")
+        
+        # Apply network-friendly settings
+        git config --global http.sslVerify false
+        
+        # Try to detect and use system proxy
+        if [ -n "${http_proxy:-}" ] || [ -n "${HTTP_PROXY:-}" ]; then
+            local proxy="${http_proxy:-${HTTP_PROXY:-}}"
+            git config --global http.proxy "$proxy"
+            info "Using proxy for git: $proxy"
+        fi
+        
+        info "Git network configuration applied (SSL verification disabled)"
+    else
+        warn "Git not found, skipping network configuration"
+    fi
+}
+
+restore_git_network() {
+    if command -v git >/dev/null 2>&1; then
+        # Restore original SSL verification setting
+        if [ -n "${GIT_ORIG_SSL_VERIFY:-}" ]; then
+            git config --global http.sslVerify "$GIT_ORIG_SSL_VERIFY"
+        else
+            git config --global --unset http.sslVerify 2>/dev/null || true
+        fi
+        
+        # Restore original proxy setting
+        if [ -n "${GIT_ORIG_PROXY:-}" ]; then
+            git config --global http.proxy "$GIT_ORIG_PROXY"
+        else
+            git config --global --unset http.proxy 2>/dev/null || true
+        fi
+        
+        info "Git network configuration restored"
+    fi
+}
+
+# Enhanced git clone with network configuration
+git_clone_robust() {
+    local repo_url="$1"
+    local target_dir="$2"
+    local depth_arg="${3:---depth=1}"
+    
+    if [ -z "$repo_url" ] || [ -z "$target_dir" ]; then
+        err "git_clone_robust: missing required arguments (repo_url, target_dir)"
+    fi
+    
+    # Setup network configuration
+    setup_git_network
+    
+    # Attempt clone with retry logic
+    local max_retries=3
+    local retry_count=0
+    
+    while [ $retry_count -lt $max_retries ]; do
+        if git clone $depth_arg "$repo_url" "$target_dir" 2>/dev/null; then
+            ok "Successfully cloned $repo_url"
+            restore_git_network
+            return 0
+        fi
+        
+        retry_count=$((retry_count + 1))
+        if [ $retry_count -lt $max_retries ]; then
+            warn "Clone attempt $retry_count failed, retrying..."
+            sleep 2
+        fi
+    done
+    
+    # All retries failed
+    restore_git_network
+    err "Failed to clone $repo_url after $max_retries attempts"
+}
+
 # Import local script
 import_script() {
     local script_path="$1"

@@ -233,8 +233,8 @@ fi
 # Install Oh My Zsh
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
     info "Installing Oh My Zsh..."
-    git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh.tmp
-    mv ~/.oh-my-zsh.tmp ~/.oh-my-zsh
+    git_clone_robust "https://github.com/ohmyzsh/ohmyzsh.git" "$HOME/.oh-my-zsh.tmp" ""
+    mv "$HOME/.oh-my-zsh.tmp" "$HOME/.oh-my-zsh"
 else
     info "Oh My Zsh already installed"
 fi
@@ -243,8 +243,8 @@ fi
 P10K_DIR="$HOME/.oh-my-zsh/custom/themes/powerlevel10k"
 if [ ! -d "$P10K_DIR" ]; then
     info "Installing Powerlevel10k theme..."
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.p10k.tmp
-    mv ~/.p10k.tmp "$P10K_DIR"
+    git_clone_robust "https://github.com/romkatv/powerlevel10k.git" "$HOME/.p10k.tmp" "--depth=1"
+    mv "$HOME/.p10k.tmp" "$P10K_DIR"
 else
     info "Powerlevel10k theme already exists"
 fi
@@ -255,12 +255,12 @@ PLUGINS_DIR="$HOME/.oh-my-zsh/custom/plugins"
 
 if [ ! -d "$PLUGINS_DIR/zsh-autosuggestions" ]; then
     info "Installing zsh-autosuggestions..."
-    git clone https://github.com/zsh-users/zsh-autosuggestions "$PLUGINS_DIR/zsh-autosuggestions"
+    git_clone_robust "https://github.com/zsh-users/zsh-autosuggestions" "$PLUGINS_DIR/zsh-autosuggestions" "--depth=1"
 fi
 
 if [ ! -d "$PLUGINS_DIR/zsh-syntax-highlighting" ]; then
     info "Installing zsh-syntax-highlighting..."
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$PLUGINS_DIR/zsh-syntax-highlighting"
+    git_clone_robust "https://github.com/zsh-users/zsh-syntax-highlighting.git" "$PLUGINS_DIR/zsh-syntax-highlighting" "--depth=1"
 fi
 
 # Create optimized .zshrc
